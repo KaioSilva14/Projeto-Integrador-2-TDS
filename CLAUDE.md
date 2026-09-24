@@ -2,6 +2,19 @@
 
 > Arquivo de contexto para o Claude Code. Leia isto antes de gerar ou alterar qualquer código deste projeto.
 
+**Documentação detalhada em [`docs/`](docs/):**
+
+| Arquivo | Para que serve | Quando abrir |
+|---|---|---|
+| [PRD.md](docs/PRD.md) | Requisitos: histórias de usuário e critérios de aceite | Antes de começar qualquer funcionalidade |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Camadas, fluxo de uma requisição, DER, rotas e decisões técnicas | Antes de criar arquivo, rota ou tabela |
+| [RULES.md](docs/RULES.md) | Regras de negócio numeradas (RN01…), segurança e convenções de código | Antes de escrever validação ou consulta |
+| [DESIGN.md](docs/DESIGN.md) | Tokens visuais, componentes e o que fazer/evitar na interface | Antes de mexer em view ou CSS |
+| [TASKS.md](docs/TASKS.md) | Lista de tarefas por semana, com o que já está feito | No começo de cada aula |
+| [MEMORY.md](docs/MEMORY.md) | Decisões tomadas, problemas já resolvidos e diário do projeto | Quando algo "estranho" acontecer, e ao fim de cada sessão |
+
+Este arquivo é o resumo; os `docs/` detalham. Se um doc e o código discordarem, **o código é a verdade** — corrija o doc na mesma hora. Ao terminar uma tarefa: marcar em `TASKS.md` e anotar em `MEMORY.md` qualquer decisão ou problema novo.
+
 ---
 
 ## 0. Ficha do projeto
@@ -22,11 +35,11 @@
 
 ## 1. Como este projeto vai ser executado
 
-O grupo tem 3 integrantes no papel, mas **você vai construir o sistema inteiro sozinho**, sem divisão de papéis. Por isso este documento não segue o modelo "líder / responsável pelo banco / responsável pelo back-end" sugerido pelo professor — ele descreve **um único fluxo de trabalho sequencial** que você consegue tocar solo, dentro das 9 aulas semanais.
+O grupo tem 4 integrantes no papel, mas **você vai construir o sistema inteiro sozinho**, sem divisão de papéis. Por isso este documento não segue o modelo "líder / responsável pelo banco / responsável pelo back-end" sugerido pelo professor — ele descreve **um único fluxo de trabalho sequencial** que você consegue tocar solo, dentro das 9 aulas semanais.
 
 Consequência prática nas decisões abaixo: sempre que havia uma escolha entre "mais robusto, mais peças" e "mais simples, menos peças", **escolhi o mais simples que ainda atende os critérios de avaliação**. Isso é proposital — um projeto solo não pode depender de você debugar 3 tecnologias novas ao mesmo tempo sob prazo fixo.
 
-Nas reuniões/apresentações em grupo, o discurso institucional pode continuar mencionando os 3 nomes como equipe — isso não muda nada tecnicamente aqui.
+Nas reuniões/apresentações em grupo, o discurso institucional pode continuar mencionando os 4 nomes como equipe — isso não muda nada tecnicamente aqui.
 
 ---
 
@@ -325,10 +338,12 @@ Usar **um único arquivo** `public/css/style.css`, sem framework, para manter o 
 ```
 Projeto-Integrador-2-TDS/
 ├── CLAUDE.md
+├── README.md                     # instruções de instalação (espelho da seção 16)
 ├── .env                          # segredos reais — NÃO versionar (está no .gitignore)
 ├── .env.example                  # modelo do .env, sem segredos — versionado
 ├── .gitignore
 ├── package.json
+├── docs/                         # PRD, ARCHITECTURE, RULES, DESIGN, TASKS, MEMORY
 ├── data/
 │   └── eventos.db                # banco SQLite, criado automaticamente — NÃO versionar (está no .gitignore)
 ├── src/
@@ -422,27 +437,82 @@ O plano do professor pressupõe 4 pessoas trabalhando em paralelo. Como você fa
 - Exportação CSV dos inscritos.
 - Múltiplos organizadores com papéis diferentes.
 - Encerramento automático de evento por data via job agendado.
+
 ---
 
-## 16. Como rodar e estado atual
+## 16. Instruções de instalação e execução
 
-**Primeira vez numa máquina nova:**
-```bash
-npm install
-cp .env.example .env      # e preencher SESSION_SECRET e ADMIN_SENHA
-npm run seed              # cria o banco, as categorias e o organizador
-npm run dev               # http://localhost:3333 (reinicia sozinho ao salvar)
+Esta seção é a parte de "documentação" exigida no item 9 do plano do professor (DER, SQL, API e instruções). Deve virar também o `README.md` do repositório.
+
+### 16.1 Pré-requisitos
+- Node.js LTS instalado (já ✅ no seu ambiente).
+- Git instalado (já ✅).
+
+### 16.2 Dependências (`package.json`)
+
+O arquivo real é o `package.json` na raiz — não copiar a lista para cá (ela desatualiza). O que está instalado:
+
+| Pacote | Versão | Para quê |
+|---|---|---|
+| `express` | 4.x | servidor e rotas |
+| `express-session` | 1.x | sessão do organizador |
+| `ejs` | 6.x | views renderizadas no servidor |
+| `better-sqlite3` | 13.x | banco SQLite (a 11.x não tem binário pronto para o Node 24) |
+| `bcryptjs` | 3.x | hash da senha (ver seção 4) |
+| `dotenv` | 18.x | lê o `.env` |
+| `nodemon` (dev) | 3.x | reinicia o servidor ao salvar |
+
+Scripts: `npm start` (produção), `npm run dev` (desenvolvimento), `npm run seed` (dados iniciais).
+
+> O npm 11 bloqueia scripts de instalação por padrão. O `better-sqlite3` precisa do dele (baixa o binário nativo), por isso o `package.json` tem `"allowScripts": { "better-sqlite3@13.0.3": true }`. Se atualizar a versão do pacote, rodar `npm approve-scripts better-sqlite3` de novo.
+
+### 16.3 Variáveis de ambiente (`.env`)
+
+Copiar de `.env.example` (que é versionado) e preencher. O `.env` real nunca vai para o Git.
+
+```
+PORT=3333
+SESSION_SECRET=         # texto aleatório longo — gerar com o comando abaixo
+DB_PATH=./data/eventos.db
+
+ADMIN_NOME=Coordenação
+ADMIN_EMAIL=organizador@escola.com
+ADMIN_SENHA=            # senha do organizador, usada só pelo seed
 ```
 
-A porta padrão é **3333** (a 3000 costuma estar ocupada por outros projetos). Para trocar, mude `PORT` no `.env`.
+Gerar um `SESSION_SECRET`: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
-**Estado em 24/09/2026 — fundação pronta:**
-- [x] `npm init`, dependências instaladas, estrutura de pastas da seção 10
-- [x] `schema.sql` + `db.js` (com `PRAGMA foreign_keys = ON`) + `seed.js`
-- [x] Testado no banco: duplicidade bloqueada pela `UNIQUE`, categoria em uso não pode ser excluída, excluir evento apaga as inscrições (cascata)
-- [x] `server.js` com sessão, arquivos estáticos e página 404
-- [x] Home (`GET /`) listando eventos abertos com vagas restantes e filtro por categoria
-- [x] `requireAuth.js` criado (ainda não usado — entra com as rotas do admin)
-- [ ] Todo o resto das seções 6.1–6.4, na ordem do cronograma (seção 12)
+A porta padrão é **3333** porque a 3000 costuma estar ocupada por outros projetos na máquina. Se a porta estiver em uso, o servidor avisa e para.
 
-Arquivos da seção 10 que ainda não existem são criados quando a etapa correspondente começar — não criar arquivos vazios antes.
+### 16.4 Passo a passo (primeira vez)
+```bash
+git clone <url-do-repositorio>
+cd <pasta-do-repositorio>
+npm install
+cp .env.example .env   # depois abrir o .env e preencher SESSION_SECRET e ADMIN_SENHA
+npm run seed           # cria as tabelas (schema.sql), categorias padrão e o usuário organizador
+npm run dev            # inicia em http://localhost:3333
+```
+
+### 16.5 Login do organizador (criado pelo seed)
+| Campo | Valor |
+|---|---|
+| E-mail | o `ADMIN_EMAIL` do `.env` (padrão: `organizador@escola.com`) |
+| Senha | o `ADMIN_SENHA` do `.env` |
+
+A senha **não** fica no código (`seed.js` é versionado e iria parar no GitHub) — só no `.env`, e no banco apenas como hash. Trocar a senha = mudar `ADMIN_SENHA` no `.env` e resetar o banco (16.6); não existe tela de troca de senha no MVP.
+
+### 16.6 Resetar o banco (se precisar recomeçar do zero)
+```bash
+rm data/eventos.db
+npm run seed
+```
+Apaga **todos** os eventos e inscrições. Com o servidor rodando, pará-lo antes (o Windows não deixa apagar arquivo aberto).
+
+### 16.7 `.gitignore`
+```
+node_modules/
+.env
+data/*.db
+data/*.db-*
+```
