@@ -1,0 +1,48 @@
+<%- include('../partials/header', { titulo: evento.titulo }) %>
+<% const restantes = evento.capacidade - evento.vagas_ocupadas; %>
+
+<a href="/" class="link-voltar">← Todos os eventos</a>
+
+<article class="detalhe">
+  <header class="detalhe-cabecalho">
+    <span class="categoria"><%= evento.categoria %></span>
+    <h1><%= evento.titulo %></h1>
+  </header>
+
+  <dl class="detalhe-dados">
+    <div>
+      <dt>Data</dt>
+      <dd><%= formatarData(evento.data_evento) %></dd>
+    </div>
+    <div>
+      <dt>Horário</dt>
+      <dd><%= evento.hora_inicio %><%= evento.hora_fim ? ' às ' + evento.hora_fim : '' %></dd>
+    </div>
+    <div>
+      <dt>Local</dt>
+      <dd><%= evento.local %></dd>
+    </div>
+    <div>
+      <dt>Vagas</dt>
+      <dd><%= Math.max(restantes, 0) %> de <%= evento.capacidade %></dd>
+    </div>
+  </dl>
+
+  <% if (evento.descricao) { %>
+    <p class="detalhe-descricao"><%= evento.descricao %></p>
+  <% } %>
+
+  <div class="detalhe-acao">
+    <% if (evento.inscricoes_encerradas) { %>
+      <%- include('../partials/badge-evento', { evento }) %>
+      <p class="info">As inscrições para este evento estão encerradas.</p>
+    <% } else if (restantes <= 0) { %>
+      <%- include('../partials/badge-evento', { evento }) %>
+      <p class="info">As vagas deste evento esgotaram.</p>
+    <% } else { %>
+      <a href="/eventos/<%= evento.id %>/inscrever" class="botao botao-largo">Inscrever-se</a>
+    <% } %>
+  </div>
+</article>
+
+<%- include('../partials/footer') %>

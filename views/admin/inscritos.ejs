@@ -1,0 +1,60 @@
+<%- include('../partials/header', { titulo: 'Inscritos' }) %>
+
+<a href="/admin/eventos" class="link-voltar">← Eventos</a>
+
+<section class="cabecalho-pagina cabecalho-com-acao">
+  <div>
+    <span class="categoria"><%= evento.categoria %></span>
+    <h1><%= evento.titulo %></h1>
+    <p class="subtitulo"><%= formatarData(evento.data_evento) %> · <%= evento.hora_inicio %> · <%= evento.local %></p>
+  </div>
+  <a href="/admin/eventos/<%= evento.id %>/editar" class="botao botao-secundario">Editar evento</a>
+</section>
+
+<ul class="numeros">
+  <li><span class="numero"><%= inscritos.length %>/<%= evento.capacidade %></span> inscritos</li>
+  <li><span class="numero"><%= presentes %></span> presentes</li>
+  <li><span class="numero"><%= inscritos.length - presentes %></span> ausentes</li>
+</ul>
+
+<% if (inscritos.length === 0) { %>
+  <div class="vazio">
+    <p><strong>Ninguém se inscreveu ainda.</strong></p>
+    <p>Compartilhe o link do evento: <a href="/eventos/<%= evento.id %>">/eventos/<%= evento.id %></a></p>
+  </div>
+<% } else { %>
+  <div class="tabela-rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th scope="col">Nome</th>
+          <th scope="col">Presença</th>
+          <th scope="col">Turma</th>
+          <th scope="col">E-mail</th>
+          <th scope="col">Inscrição</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% inscritos.forEach(inscrito => { %>
+          <tr id="inscricao-<%= inscrito.id %>" class="<%= inscrito.presenca_confirmada ? 'linha-presente' : '' %>">
+            <td class="tabela-titulo"><%= inscrito.nome %></td>
+            <td>
+              <form method="post" action="/admin/inscricoes/<%= inscrito.id %>/presenca">
+                <% if (inscrito.presenca_confirmada) { %>
+                  <button type="submit" class="botao-presenca presente" aria-label="Desmarcar presença de <%= inscrito.nome %>">✓ Presente</button>
+                <% } else { %>
+                  <button type="submit" class="botao-presenca" aria-label="Marcar presença de <%= inscrito.nome %>">Marcar presença</button>
+                <% } %>
+              </form>
+            </td>
+            <td class="sem-quebra"><%= inscrito.turma %></td>
+            <td class="info"><%= inscrito.email %></td>
+            <td class="info sem-quebra"><%= formatarDataHora(inscrito.data_inscricao) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

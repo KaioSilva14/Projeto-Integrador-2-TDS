@@ -1,0 +1,61 @@
+<%- include('../partials/header', { titulo: 'Painel' }) %>
+
+<section class="cabecalho-pagina cabecalho-com-acao">
+  <div>
+    <h1>Olá, <%= usuario.nome %></h1>
+    <p class="subtitulo">Resumo dos eventos e inscrições.</p>
+  </div>
+  <a href="/admin/eventos/novo" class="botao">Criar evento</a>
+</section>
+
+<ul class="numeros">
+  <li><span class="numero"><%= resumo.eventos_abertos %></span> eventos abertos</li>
+  <li><span class="numero"><%= resumo.eventos_total %></span> eventos cadastrados</li>
+  <li><span class="numero"><%= resumo.inscricoes_total %></span> inscrições</li>
+  <li><span class="numero"><%= resumo.presencas_total %></span> presenças confirmadas</li>
+</ul>
+
+<div class="duas-colunas">
+  <section>
+    <h2 class="titulo-secao">Próximos eventos</h2>
+    <% if (proximos.length === 0) { %>
+      <div class="vazio">
+        <p><strong>Nenhum evento aberto.</strong></p>
+        <p><a href="/admin/eventos/novo">Criar o primeiro evento</a></p>
+      </div>
+    <% } else { %>
+      <ul class="lista-simples">
+        <% proximos.forEach(evento => { %>
+          <li>
+            <a href="/admin/eventos/<%= evento.id %>/inscritos"><%= evento.titulo %></a>
+            <span class="info"><%= formatarData(evento.data_evento) %> · <%= evento.vagas_ocupadas %>/<%= evento.capacidade %> inscritos</span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <section>
+    <h2 class="titulo-secao">Inscrições recentes</h2>
+    <% if (recentes.length === 0) { %>
+      <div class="vazio">
+        <p><strong>Nenhuma inscrição ainda.</strong></p>
+        <p>As inscrições dos alunos aparecem aqui.</p>
+      </div>
+    <% } else { %>
+      <ul class="lista-simples">
+        <% recentes.forEach(inscricao => { %>
+          <li>
+            <span><strong><%= inscricao.nome %></strong> (<%= inscricao.turma %>)</span>
+            <span class="info">
+              <a href="/admin/eventos/<%= inscricao.evento_id %>/inscritos"><%= inscricao.titulo %></a>
+              · <%= formatarDataHora(inscricao.data_inscricao) %>
+            </span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,26 @@
+<%- include('../partials/header', { titulo: 'Entrar' }) %>
+
+<section class="painel-estreito caixa">
+  <header class="cabecalho-pagina">
+    <h1>Área do organizador</h1>
+    <p class="subtitulo">Entre para gerenciar eventos e inscrições.</p>
+  </header>
+
+  <% if (erro) { %>
+    <div class="aviso aviso-erro" role="alert"><%= erro %></div>
+  <% } %>
+
+  <form method="post" action="/admin/login" class="formulario">
+    <div class="campo">
+      <label for="email">E-mail</label>
+      <input type="email" id="email" name="email" value="<%= email %>" autocomplete="username" required autofocus>
+    </div>
+    <div class="campo">
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" name="senha" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="botao botao-largo">Entrar</button>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>

@@ -18,24 +18,23 @@
 
 <% if (eventos.length === 0) { %>
   <div class="vazio">
-    <p><strong>Nenhum evento aberto no momento.</strong></p>
-    <p>Quando a coordenação publicar um evento, ele aparece aqui.</p>
+    <% if (categoriaSelecionada) { %>
+      <p><strong>Nenhum evento aberto nesta categoria.</strong></p>
+      <p><a href="/">Ver todas as categorias</a></p>
+    <% } else { %>
+      <p><strong>Nenhum evento aberto no momento.</strong></p>
+      <p>Quando a coordenação publicar um evento, ele aparece aqui.</p>
+    <% } %>
   </div>
 <% } else { %>
   <ul class="lista-eventos">
-    <% eventos.forEach(e => {
-         const restantes = e.capacidade - e.vagas_ocupadas;
-         const [ano, mes, dia] = e.data_evento.split('-'); %>
+    <% eventos.forEach(evento => { %>
       <li class="card">
-        <a href="/eventos/<%= e.id %>" class="card-link">
-          <span class="categoria"><%= e.categoria %></span>
-          <h2><%= e.titulo %></h2>
-          <p class="info"><%= dia %>/<%= mes %>/<%= ano %> · <%= e.hora_inicio %> · <%= e.local %></p>
-          <% if (restantes > 0) { %>
-            <span class="badge badge-disponivel"><%= restantes %> <%= restantes === 1 ? 'vaga' : 'vagas' %></span>
-          <% } else { %>
-            <span class="badge badge-esgotado">Esgotado</span>
-          <% } %>
+        <a href="/eventos/<%= evento.id %>" class="card-link">
+          <span class="categoria"><%= evento.categoria %></span>
+          <h2><%= evento.titulo %></h2>
+          <p class="info"><%= formatarData(evento.data_evento) %> · <%= evento.hora_inicio %> · <%= evento.local %></p>
+          <%- include('../partials/badge-evento', { evento }) %>
         </a>
       </li>
     <% }) %>

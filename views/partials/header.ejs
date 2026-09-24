@@ -12,10 +12,17 @@
 <body>
   <header class="topo">
     <div class="container topo-conteudo">
-      <a href="/" class="marca">Eventos Escolares</a>
-      <nav>
-        <% if (usuario) { %>
-          <a href="/admin">Painel</a>
+      <a href="<%= usuario ? '/admin' : '/' %>" class="marca">Eventos Escolares</a>
+      <nav class="menu" aria-label="Menu principal">
+        <% if (usuario) {
+             const ativo = (inicio) => caminho === inicio || (inicio !== '/admin' && caminho.startsWith(inicio)); %>
+          <a href="/admin" <%- ativo('/admin') ? 'aria-current="page"' : '' %>>Painel</a>
+          <a href="/admin/eventos" <%- ativo('/admin/eventos') ? 'aria-current="page"' : '' %>>Eventos</a>
+          <a href="/admin/categorias" <%- ativo('/admin/categorias') ? 'aria-current="page"' : '' %>>Categorias</a>
+          <a href="/">Ver site</a>
+          <form method="post" action="/admin/logout" class="form-sair">
+            <button type="submit" class="link-botao">Sair</button>
+          </form>
         <% } else { %>
           <a href="/admin/login">Área do organizador</a>
         <% } %>
@@ -23,3 +30,6 @@
     </div>
   </header>
   <main class="container">
+    <% if (aviso) { %>
+      <div class="aviso aviso-<%= aviso.tipo %>" role="status"><%= aviso.texto %></div>
+    <% } %>

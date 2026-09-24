@@ -1,0 +1,55 @@
+<%- include('../partials/header', { titulo: 'Eventos' }) %>
+
+<section class="cabecalho-pagina cabecalho-com-acao">
+  <div>
+    <h1>Eventos</h1>
+    <p class="subtitulo">Todos os eventos, dos próximos para os que já passaram.</p>
+  </div>
+  <a href="/admin/eventos/novo" class="botao">Criar evento</a>
+</section>
+
+<% if (eventos.length === 0) { %>
+  <div class="vazio">
+    <p><strong>Nenhum evento cadastrado.</strong></p>
+    <p><a href="/admin/eventos/novo">Criar o primeiro evento</a></p>
+  </div>
+<% } else { %>
+  <div class="tabela-rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th scope="col">Evento</th>
+          <th scope="col">Data</th>
+          <th scope="col" class="numero-coluna">Inscritos</th>
+          <th scope="col">Status</th>
+          <th scope="col"><span class="visualmente-oculto">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% eventos.forEach(evento => { %>
+          <tr>
+            <td>
+              <a href="/admin/eventos/<%= evento.id %>/inscritos" class="tabela-titulo"><%= evento.titulo %></a>
+              <span class="info"><%= evento.categoria %> · <%= evento.local %></span>
+            </td>
+            <td><%= formatarData(evento.data_evento) %><br><span class="info"><%= evento.hora_inicio %></span></td>
+            <td class="numero-coluna"><%= evento.vagas_ocupadas %>/<%= evento.capacidade %></td>
+            <td><%- include('../partials/badge-evento', { evento }) %></td>
+            <td>
+              <div class="acoes">
+                <a href="/admin/eventos/<%= evento.id %>/inscritos" class="botao botao-secundario botao-pequeno">Inscritos</a>
+                <a href="/admin/eventos/<%= evento.id %>/editar" class="botao botao-secundario botao-pequeno">Editar</a>
+                <form method="post" action="/admin/eventos/<%= evento.id %>/excluir"
+                      data-confirmar="Excluir o evento &quot;<%= evento.titulo %>&quot; e suas <%= evento.vagas_ocupadas %> inscrição(ões)? Não dá para desfazer.">
+                  <button type="submit" class="botao botao-perigo botao-pequeno">Excluir</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

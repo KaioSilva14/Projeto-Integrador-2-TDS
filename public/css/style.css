@@ -16,7 +16,9 @@
   --cor-superficie: #FFFFFF;
   --cor-texto: #1E293B;
   --cor-texto-suave: #64748B;
-  --cor-borda: #E2E8F0;
+  --cor-borda: #E2E8F0;          /* divisórias e cards (decorativo) */
+  --cor-borda-campo: #8391A5;    /* contorno de campo: 3.2:1 no branco (WCAG 1.4.11) */
+  --cor-destaque-fundo: #EFF6FF; /* linha da tabela recém-alterada */
 
   --raio: 12px;
   --raio-campo: 8px;
@@ -81,9 +83,13 @@ main.container {
 
 .topo-conteudo {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  gap: 8px 24px;
+  min-height: 64px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .marca {
@@ -94,15 +100,45 @@ main.container {
   text-decoration: none;
 }
 
-.topo nav a {
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+}
+
+.menu a,
+.link-botao {
   color: var(--cor-texto-suave);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.9375rem;
 }
 
-.topo nav a:hover {
+.menu a:hover,
+.link-botao:hover {
   color: var(--cor-primaria);
+}
+
+.menu a[aria-current="page"] {
+  color: var(--cor-texto);
+  text-decoration: underline;
+  text-decoration-color: var(--cor-primaria);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+.form-sair {
+  display: inline;
+  margin: 0;
+}
+
+.link-botao {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .rodape {
@@ -147,7 +183,7 @@ textarea {
   font: inherit;
   color: inherit;
   padding: 8px 12px;
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--cor-borda-campo);
   border-radius: var(--raio-campo);
   background: var(--cor-superficie);
 }
@@ -157,6 +193,14 @@ input:focus,
 textarea:focus {
   outline: 2px solid var(--cor-primaria);
   outline-offset: 1px;
+}
+
+/* Foco visível para quem navega pelo teclado (DESIGN.md → Estados obrigatórios). */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* ---------- Botões ---------- */
@@ -191,6 +235,37 @@ textarea:focus {
 
 .botao-secundario:hover {
   background: var(--cor-fundo);
+}
+
+/* Contornado: numa lista com vários, o vermelho cheio chamaria mais atenção que tudo (DESIGN.md). */
+.botao-perigo {
+  background: var(--cor-superficie);
+  border-color: var(--cor-alerta-fundo);
+  color: var(--cor-alerta-texto);
+}
+
+.botao-perigo:hover {
+  background: var(--cor-alerta-fundo);
+  border-color: var(--cor-alerta);
+}
+
+.botao-pequeno {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+}
+
+/* No celular o botão principal ocupa a largura toda (área de toque maior). */
+.botao-largo {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .botao-largo {
+    display: inline-block;
+    width: auto;
+  }
 }
 
 /* ---------- Cards de evento ---------- */
@@ -290,6 +365,440 @@ textarea:focus {
 
 .vazio strong {
   color: var(--cor-texto);
+}
+
+/* ---------- Avisos ---------- */
+
+.aviso {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  border-left: 4px solid;
+  border-radius: var(--raio-campo);
+  font-weight: 500;
+}
+
+.aviso-sucesso {
+  border-color: var(--cor-sucesso);
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso-texto);
+}
+
+.aviso-erro {
+  border-color: var(--cor-alerta);
+  background: var(--cor-alerta-fundo);
+  color: var(--cor-alerta-texto);
+}
+
+/* ---------- Navegação dentro da página ---------- */
+
+.link-voltar {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.link-voltar:hover {
+  text-decoration: underline;
+}
+
+.cabecalho-com-acao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* ---------- Larguras de conteúdo ---------- */
+
+.painel-estreito {
+  max-width: 480px;
+}
+
+.painel-medio {
+  max-width: 680px;
+}
+
+.caixa {
+  margin: 32px auto 0;
+  padding: 32px 24px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+/* ---------- Detalhes do evento ---------- */
+
+.detalhe {
+  max-width: 680px;
+}
+
+.detalhe-cabecalho h1 {
+  margin-top: 4px;
+  font-size: 1.75rem;
+}
+
+.detalhe-dados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+  padding: 20px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.detalhe-dados dt {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-texto-suave);
+}
+
+.detalhe-dados dd {
+  margin: 4px 0 0;
+  font-weight: 600;
+}
+
+.detalhe-descricao {
+  margin: 0 0 24px;
+  white-space: pre-line; /* mantém as quebras de linha digitadas pelo organizador */
+}
+
+.detalhe-acao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* ---------- Confirmação ---------- */
+
+.confirmacao {
+  margin: 16px auto 0;
+  text-align: center;
+}
+
+.confirmacao .detalhe-dados {
+  text-align: left;
+}
+
+.confirmacao-selo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso-texto);
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.confirmacao .info {
+  margin-bottom: 24px;
+}
+
+/* ---------- Formulários ---------- */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formulario fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0 0 8px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.formulario legend {
+  margin-bottom: 12px;
+  padding: 0;
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 1.0625rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+}
+
+.campo textarea {
+  resize: vertical;
+}
+
+.opcional {
+  font-weight: 400;
+  color: var(--cor-texto-suave);
+}
+
+.erro-campo {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--cor-alerta-texto);
+}
+
+[aria-invalid="true"] {
+  border-color: var(--cor-alerta-forte);
+}
+
+.campos-linha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+@media (min-width: 600px) {
+  .campo-largo {
+    grid-column: span 2;
+  }
+}
+
+.formulario-linha {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+
+.formulario-linha .campo {
+  flex: 1 1 240px;
+  max-width: 360px;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.acoes form {
+  margin: 0;
+}
+
+/* ---------- Painel: números e listas ---------- */
+
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0 0 32px;
+  padding: 0;
+  list-style: none;
+}
+
+.numeros li {
+  padding: 16px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  color: var(--cor-texto-suave);
+  font-size: 0.9375rem;
+}
+
+.numero {
+  display: block;
+  font-family: var(--fonte-titulo);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--cor-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.duas-colunas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 32px;
+}
+
+.titulo-secao {
+  margin-bottom: 12px;
+  font-size: 1.125rem;
+}
+
+.lista-simples {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.lista-simples li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.lista-simples li:last-child {
+  border-bottom: 0;
+}
+
+.lista-simples a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lista-simples .info a {
+  font-weight: 500;
+}
+
+/* ---------- Tabela ---------- */
+
+/* No celular a tabela rola dentro da caixa; a página nunca rola para o lado. */
+.tabela-rolagem {
+  overflow-x: auto;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.tabela th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-texto-suave);
+  border-bottom: 1px solid var(--cor-borda);
+  white-space: nowrap;
+}
+
+.tabela td {
+  padding: 12px 16px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.tabela tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* span.info: a segunda linha dentro da célula. Uma td com .info continua sendo célula. */
+.tabela span.info {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.tabela-titulo {
+  font-weight: 600;
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+a.tabela-titulo:hover {
+  color: var(--cor-primaria);
+}
+
+.sem-quebra {
+  white-space: nowrap;
+}
+
+.numero-coluna {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tabela .acoes {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+/* Linha para onde o check-in voltou: destaque discreto, sem animação (DESIGN.md → Movimento). */
+.tabela tr:target td {
+  background: var(--cor-destaque-fundo);
+}
+
+.tabela tr {
+  scroll-margin-top: 96px;
+}
+
+/* ---------- Check-in ---------- */
+
+.botao-presenca {
+  min-width: 150px;
+  min-height: 40px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: var(--raio-campo);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.botao-presenca:hover {
+  border-color: var(--cor-primaria);
+  color: var(--cor-primaria);
+}
+
+.botao-presenca.presente {
+  border-color: var(--cor-sucesso);
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso-texto);
+}
+
+.linha-presente .tabela-titulo {
+  color: var(--cor-sucesso-texto);
+}
+
+/* ---------- Utilitários ---------- */
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--cor-neutro-fundo);
+  font-size: 0.875em;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,57 @@
+<%- include('../partials/header', { titulo: 'Categorias' }) %>
+
+<section class="cabecalho-pagina">
+  <h1>Categorias</h1>
+  <p class="subtitulo">Categorias usadas por algum evento não podem ser excluídas.</p>
+</section>
+
+<form method="post" action="/admin/categorias" class="formulario formulario-linha">
+  <div class="campo">
+    <label for="nome">Nova categoria</label>
+    <input type="text" id="nome" name="nome" value="<%= valores.nome || '' %>" maxlength="40" required
+           <%- erros.nome ? 'aria-invalid="true" aria-describedby="erro-nome"' : '' %>>
+    <% if (erros.nome) { %><p class="erro-campo" id="erro-nome"><%= erros.nome %></p><% } %>
+  </div>
+  <button type="submit" class="botao">Adicionar</button>
+</form>
+
+<% if (categorias.length === 0) { %>
+  <div class="vazio">
+    <p><strong>Nenhuma categoria cadastrada.</strong></p>
+    <p>Crie uma acima ou rode <code>npm run seed</code> para as categorias padrão.</p>
+  </div>
+<% } else { %>
+  <div class="tabela-rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th scope="col">Nome</th>
+          <th scope="col" class="numero-coluna">Eventos</th>
+          <th scope="col"><span class="visualmente-oculto">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% categorias.forEach(categoria => { %>
+          <tr>
+            <td class="tabela-titulo"><%= categoria.nome %></td>
+            <td class="numero-coluna"><%= categoria.total_eventos %></td>
+            <td>
+              <div class="acoes">
+                <% if (categoria.total_eventos === 0) { %>
+                  <form method="post" action="/admin/categorias/<%= categoria.id %>/excluir"
+                        data-confirmar="Excluir a categoria &quot;<%= categoria.nome %>&quot;?">
+                    <button type="submit" class="botao botao-perigo botao-pequeno">Excluir</button>
+                  </form>
+                <% } else { %>
+                  <span class="info">Em uso</span>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

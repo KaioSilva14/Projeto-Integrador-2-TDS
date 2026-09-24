@@ -1,0 +1,9 @@
+<%# Selo de status de um evento (DESIGN.md → Badge). Espera: evento (com vagas_ocupadas e inscricoes_encerradas). %>
+<% const restantes = evento.capacidade - evento.vagas_ocupadas; %>
+<% if (evento.inscricoes_encerradas) { %>
+  <span class="badge badge-encerrado">Encerrado</span>
+<% } else if (restantes <= 0) { %>
+  <span class="badge badge-esgotado">Esgotado</span>
+<% } else { %>
+  <span class="badge badge-disponivel"><%= restantes %> <%= restantes === 1 ? 'vaga' : 'vagas' %></span>
+<% } %>

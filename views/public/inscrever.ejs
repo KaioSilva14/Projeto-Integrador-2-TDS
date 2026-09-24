@@ -1,0 +1,57 @@
+<%- include('../partials/header', { titulo: 'Inscrição' }) %>
+<% const aceita = !evento.inscricoes_encerradas && evento.vagas_ocupadas < evento.capacidade; %>
+
+<a href="/eventos/<%= evento.id %>" class="link-voltar">← Voltar para o evento</a>
+
+<section class="painel-estreito">
+  <header class="cabecalho-pagina">
+    <h1>Inscrição</h1>
+    <p class="subtitulo">
+      <strong><%= evento.titulo %></strong><br>
+      <%= formatarData(evento.data_evento) %> · <%= evento.hora_inicio %> · <%= evento.local %>
+    </p>
+  </header>
+
+  <% if (erro) { %>
+    <div class="aviso aviso-erro" role="alert"><%= erro %></div>
+  <% } %>
+
+  <% if (!aceita) { %>
+    <% if (!erro) { %>
+      <div class="aviso aviso-erro" role="alert">
+        <%= evento.inscricoes_encerradas ? 'As inscrições para este evento estão encerradas.' : 'As vagas deste evento esgotaram.' %>
+      </div>
+    <% } %>
+    <a href="/" class="botao botao-secundario">Ver outros eventos</a>
+  <% } else { %>
+    <form method="post" action="/eventos/<%= evento.id %>/inscrever" class="formulario">
+      <div class="campo">
+        <label for="nome">Nome completo</label>
+        <input type="text" id="nome" name="nome" value="<%= valores.nome || '' %>"
+               maxlength="100" autocomplete="name" required
+               <%- erros.nome ? 'aria-invalid="true" aria-describedby="erro-nome"' : '' %>>
+        <% if (erros.nome) { %><p class="erro-campo" id="erro-nome"><%= erros.nome %></p><% } %>
+      </div>
+
+      <div class="campo">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" value="<%= valores.email || '' %>"
+               maxlength="120" autocomplete="email" inputmode="email" required
+               <%- erros.email ? 'aria-invalid="true" aria-describedby="erro-email"' : '' %>>
+        <% if (erros.email) { %><p class="erro-campo" id="erro-email"><%= erros.email %></p><% } %>
+      </div>
+
+      <div class="campo">
+        <label for="turma">Turma</label>
+        <input type="text" id="turma" name="turma" value="<%= valores.turma || '' %>"
+               maxlength="20" placeholder="Ex.: 2º TDS" required
+               <%- erros.turma ? 'aria-invalid="true" aria-describedby="erro-turma"' : '' %>>
+        <% if (erros.turma) { %><p class="erro-campo" id="erro-turma"><%= erros.turma %></p><% } %>
+      </div>
+
+      <button type="submit" class="botao botao-largo">Confirmar inscrição</button>
+    </form>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

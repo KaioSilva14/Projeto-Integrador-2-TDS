@@ -1,0 +1,112 @@
+<% const editando = Boolean(evento);
+   const titulo = editando ? 'Editar evento' : 'Criar evento'; %>
+<%- include('../partials/header', { titulo }) %>
+
+<a href="/admin/eventos" class="link-voltar">← Eventos</a>
+
+<section class="painel-medio">
+  <header class="cabecalho-pagina">
+    <h1><%= titulo %></h1>
+    <% if (editando) { %>
+      <p class="subtitulo"><%= evento.vagas_ocupadas %> inscrito(s) até agora.</p>
+    <% } %>
+  </header>
+
+  <% if (Object.keys(erros).length > 0) { %>
+    <div class="aviso aviso-erro" role="alert">Corrija os campos marcados abaixo.</div>
+  <% } %>
+
+  <%# Um campo do formulário: rótulo + entrada + mensagem de erro (DESIGN.md → Grupo de campo). %>
+  <% function atributosErro(nome) {
+       return erros[nome] ? `aria-invalid="true" aria-describedby="erro-${nome}"` : '';
+     } %>
+
+  <form method="post" action="<%= editando ? '/admin/eventos/' + evento.id : '/admin/eventos' %>" class="formulario">
+    <fieldset>
+      <legend>O quê</legend>
+
+      <div class="campo">
+        <label for="titulo">Título</label>
+        <input type="text" id="titulo" name="titulo" value="<%= valores.titulo || '' %>" maxlength="120" required <%- atributosErro('titulo') %>>
+        <% if (erros.titulo) { %><p class="erro-campo" id="erro-titulo"><%= erros.titulo %></p><% } %>
+      </div>
+
+      <div class="campo">
+        <label for="categoria_id">Categoria</label>
+        <select id="categoria_id" name="categoria_id" required <%- atributosErro('categoria_id') %>>
+          <option value="">Escolha…</option>
+          <% categorias.forEach(c => { %>
+            <option value="<%= c.id %>" <%= c.id === valores.categoria_id ? 'selected' : '' %>><%= c.nome %></option>
+          <% }) %>
+        </select>
+        <% if (erros.categoria_id) { %><p class="erro-campo" id="erro-categoria_id"><%= erros.categoria_id %></p><% } %>
+      </div>
+
+      <div class="campo">
+        <label for="descricao">Descrição <span class="opcional">(opcional)</span></label>
+        <textarea id="descricao" name="descricao" rows="4" maxlength="2000" <%- atributosErro('descricao') %>><%= valores.descricao || '' %></textarea>
+        <% if (erros.descricao) { %><p class="erro-campo" id="erro-descricao"><%= erros.descricao %></p><% } %>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Quando</legend>
+
+      <div class="campos-linha">
+        <div class="campo">
+          <label for="data_evento">Data</label>
+          <input type="date" id="data_evento" name="data_evento" value="<%= valores.data_evento || '' %>" required <%- atributosErro('data_evento') %>>
+          <% if (erros.data_evento) { %><p class="erro-campo" id="erro-data_evento"><%= erros.data_evento %></p><% } %>
+        </div>
+
+        <div class="campo">
+          <label for="hora_inicio">Início</label>
+          <input type="time" id="hora_inicio" name="hora_inicio" value="<%= valores.hora_inicio || '' %>" required <%- atributosErro('hora_inicio') %>>
+          <% if (erros.hora_inicio) { %><p class="erro-campo" id="erro-hora_inicio"><%= erros.hora_inicio %></p><% } %>
+        </div>
+
+        <div class="campo">
+          <label for="hora_fim">Término <span class="opcional">(opcional)</span></label>
+          <input type="time" id="hora_fim" name="hora_fim" value="<%= valores.hora_fim || '' %>" <%- atributosErro('hora_fim') %>>
+          <% if (erros.hora_fim) { %><p class="erro-campo" id="erro-hora_fim"><%= erros.hora_fim %></p><% } %>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Onde e quantos</legend>
+
+      <div class="campos-linha">
+        <div class="campo campo-largo">
+          <label for="local">Local</label>
+          <input type="text" id="local" name="local" value="<%= valores.local || '' %>" maxlength="120" required <%- atributosErro('local') %>>
+          <% if (erros.local) { %><p class="erro-campo" id="erro-local"><%= erros.local %></p><% } %>
+        </div>
+
+        <div class="campo">
+          <label for="capacidade">Vagas</label>
+          <input type="number" id="capacidade" name="capacidade" value="<%= Number.isInteger(valores.capacidade) ? valores.capacidade : '' %>"
+                 min="<%= editando ? Math.max(evento.vagas_ocupadas, 1) : 1 %>" max="10000" required <%- atributosErro('capacidade') %>>
+          <% if (erros.capacidade) { %><p class="erro-campo" id="erro-capacidade"><%= erros.capacidade %></p><% } %>
+        </div>
+      </div>
+
+      <% if (editando) { %>
+        <div class="campo">
+          <label for="status">Inscrições</label>
+          <select id="status" name="status">
+            <option value="aberto" <%= valores.status === 'aberto' ? 'selected' : '' %>>Abertas</option>
+            <option value="encerrado" <%= valores.status === 'encerrado' ? 'selected' : '' %>>Encerradas</option>
+          </select>
+        </div>
+      <% } %>
+    </fieldset>
+
+    <div class="acoes">
+      <button type="submit" class="botao"><%= editando ? 'Salvar alterações' : 'Criar evento' %></button>
+      <a href="/admin/eventos" class="botao botao-secundario">Cancelar</a>
+    </div>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>

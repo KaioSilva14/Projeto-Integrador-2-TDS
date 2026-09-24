@@ -1,0 +1,32 @@
+<%- include('../partials/header', { titulo: 'Inscrição confirmada' }) %>
+
+<section class="painel-estreito confirmacao">
+  <div class="confirmacao-selo" aria-hidden="true">✓</div>
+  <h1>Inscrição confirmada!</h1>
+  <p class="subtitulo"><%= inscricao.nome %>, sua vaga está garantida.</p>
+
+  <dl class="detalhe-dados">
+    <div>
+      <dt>Evento</dt>
+      <dd><%= evento.titulo %></dd>
+    </div>
+    <div>
+      <dt>Data</dt>
+      <dd><%= formatarData(evento.data_evento) %></dd>
+    </div>
+    <div>
+      <dt>Horário</dt>
+      <dd><%= evento.hora_inicio %><%= evento.hora_fim ? ' às ' + evento.hora_fim : '' %></dd>
+    </div>
+    <div>
+      <dt>Local</dt>
+      <dd><%= evento.local %></dd>
+    </div>
+  </dl>
+
+  <p class="info">Inscrição feita com o e-mail <strong><%= inscricao.email %></strong>. No dia, é só informar seu nome na entrada.</p>
+
+  <a href="/" class="botao botao-secundario">Ver outros eventos</a>
+</section>
+
+<%- include('../partials/footer') %>
