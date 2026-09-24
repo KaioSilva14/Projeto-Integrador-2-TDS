@@ -14,11 +14,14 @@
 ## Publicação (Vercel + Turso) — passo a passo no README, "Colocar no ar"
 - [x] 🔸 Código pronto para a Vercel: banco Turso via `@libsql/client`, sessão em cookie, `vercel.json`, app exportado
 - [x] 🔸 `npm run backup` e `npm run copiar-banco` (testados: cópia, recusa sem `--substituir`, restauração)
-- [ ] Criar o banco no Turso (Vercel → Storage → Turso)
-- [ ] Importar o repositório na Vercel e configurar `SESSION_SECRET` (novo!) e `SITE_URL`
-- [ ] `npm run copiar-banco` do `data/eventos.db` para o Turso
-- [ ] Abrir o site publicado e testar: inscrição, login, check-in, contato
-- [ ] `npm run backup` apontando para o Turso, e guardar o arquivo
+- [x] Criar o banco no Turso (`eventos-gori`, aws-us-east-1)
+- [x] Importar o repositório na Vercel e configurar `SESSION_SECRET` e `SITE_URL`
+- [x] Primeiro deploy — **no ar em https://projeto-integrador-2-tds.vercel.app**
+- [x] `npm run copiar-banco` do `data/eventos.db` para o Turso (backup local feito antes)
+- [x] Testado no ar: páginas públicas, login, painel, API protegida, cookie `secure`, logout
+- [ ] Gerar um token novo do Turso (o atual passou pelo chat) — ver MEMORY.md
+- [ ] Quando os eventos reais forem cadastrados: apagar os eventos de demonstração pelo painel
+- [ ] `npm run backup` apontando para o Turso antes de cada apresentação
 - [ ] Preencher `CONTATO_EMAIL` / `CONTATO_TELEFONE` / `ESCOLA_ENDERECO` (opcional)
 
 ## Qualidade para publicação (lista de 18 itens) — feito em 24/09

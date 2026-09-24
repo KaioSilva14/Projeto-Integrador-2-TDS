@@ -12,7 +12,7 @@
 
 - **MVP completo e testado**: fluxo público (home, detalhes, inscrição, confirmação), login, painel, CRUD de eventos e categorias, inscritos com check-in, API JSON.
 - Teste de ponta a ponta: 60 verificações cobrindo todas as HUs e RNs, todas passando. Telas conferidas em 360 px e 1280 px.
-- **Pronto para a Vercel**: banco Turso (libsql), sessão em cookie, `vercel.json`. Falta só criar o Turso e importar na Vercel (TASKS.md, "Publicação").
+- **No ar:** https://projeto-integrador-2-tds.vercel.app — Vercel (`iad1`) + Turso `eventos-gori` (aws-us-east-1). Dados do PC copiados em 24/09 (7 eventos de demonstração, 33 inscrições, organizador).
 - Os 18 itens de qualidade para publicação feitos (contato, perguntas, privacidade, SEO, favicon, logo…).
 - Banco de desenvolvimento com os dados de demonstração (`npm run seed:demo`) e as suas alterações.
 - GitHub: https://github.com/KaioSilva14/Projeto-Integrador-2-TDS
@@ -99,6 +99,7 @@ Só a pasta de testes do repositório tem caminhos longos demais para o Windows.
 
 - [ ] **Quantos integrantes?** O CLAUDE.md diz "4 integrantes no papel", mas a ficha lista 3 nomes (Heitor Eckel, Kaio Silva, Samuel Donato). Falta um nome ou o número está errado?
 - [x] **URL do GitHub** — https://github.com/KaioSilva14/Projeto-Integrador-2-TDS
+- [ ] **Token do Turso** — o token atual foi colado no chat em 24/09. Por segurança, gerar um novo: Vercel → Storage → eventos-gori → Settings → rotacionar o segredo (a integração atualiza a variável na Vercel sozinha) e fazer *Redeploy*.
 - [ ] **Contato da escola** — e-mail, telefone e endereço oficiais para a página de contato (variáveis `CONTATO_*` no `.env`/Vercel). Não foram inventados.
 - [ ] **Política de privacidade** — o texto é um modelo em linguagem simples; a direção deve revisar antes de divulgar o site.
 - [ ] **Logo oficial** — o logo foi redesenhado a partir de uma imagem pequena; se a escola tiver o arquivo original em alta qualidade, substituir `public/img/logo-gori.svg`.
@@ -150,3 +151,5 @@ Existe um script (bash + curl) que confere as 90 verificações, mas ele ficou f
 - Testes finais: 90/90 verificações; revisão visual automática em 17 páginas × 3 larguras sem problemas.
 - README novo com banner animado, GIF do fluxo, prints e passo a passo de publicação.
 - Incidente: um comando de revisão que você recusou chegou a copiar o `eventos.db` para `data/revisao.db`; a cópia foi apagada e o original não foi alterado.
+- **Publicado na Vercel.** Projeto `projeto-integrador-2-tds` ligado ao GitHub; integração Turso criou `TURSO_DATABASE_URL` e `TURSO_AUTH_TOKEN` (variáveis "sensíveis": nem a API lê — é preciso pegar no painel). Primeiro deploy pronto em ~15 s; views e `schema.sql` entraram no pacote; a proteção de acesso da Vercel não bloqueia o domínio principal.
+- Backup local feito e dados copiados para o Turso com `npm run copiar-banco`. Login, painel, API protegida (401 sem login), cookie `secure; httponly` e logout testados no ar.

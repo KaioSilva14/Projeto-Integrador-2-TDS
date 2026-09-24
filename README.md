@@ -10,6 +10,8 @@
 ![EJS](https://img.shields.io/badge/EJS-1E1459?style=for-the-badge&logo=ejs&logoColor=3BD7C9)
 ![Vercel](https://img.shields.io/badge/Vercel-1E1459?style=for-the-badge&logo=vercel&logoColor=3BD7C9)
 
+### 🌐 [projeto-integrador-2-tds.vercel.app](https://projeto-integrador-2-tds.vercel.app)
+
 **Os eventos da escola num só lugar: o aluno se inscreve em segundos, sem criar conta,<br>e a coordenação sabe exatamente quem vai e quem compareceu.**
 
 [Ver demonstração](#-demonstração) · [Funcionalidades](#-funcionalidades) · [Rodar no computador](#-rodar-no-seu-computador) · [Colocar no ar](#-colocar-no-ar-vercel--turso) · [Documentação](#-documentação)

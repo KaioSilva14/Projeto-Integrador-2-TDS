@@ -99,7 +99,7 @@ Nas reuniões/apresentações em grupo, o discurso institucional pode continuar 
 | Dev | `nodemon` | Reinício automático durante o desenvolvimento. |
 | Front-end estático | CSS puro (sem framework) | Ver seção 9 (identidade visual). Não usar Bootstrap/Tailwind para não gastar tempo aprendendo outra ferramenta agora. |
 | Controle de versão | Git + GitHub | Um repositório, commits pequenos e frequentes (ver seção 11). https://github.com/KaioSilva14/Projeto-Integrador-2-TDS |
-| Hospedagem | Vercel + Turso | Deploy automático a cada `git push`; dados no Turso. Passo a passo no `README.md`, seção "Colocar no ar". |
+| Hospedagem | Vercel + Turso | **No ar em https://projeto-integrador-2-tds.vercel.app** (projeto Vercel `projeto-integrador-2-tds`, banco Turso `eventos-gori` em `aws-us-east-1`, mesma região das funções: `iad1`). Deploy automático a cada `git push` na `main`. |
 
 **Por que não React/TypeScript aqui:** seus outros projetos pessoais (WeatherFlow, App de Evolução Pessoal) usam React Native/TypeScript porque são projetos de portfólio sem prazo apertado. Este é um projeto de disciplina com entrega fixa em 04/12 e você sozinho — a prioridade é **funcionar e estar bem documentado**, não usar a stack mais moderna.
 
