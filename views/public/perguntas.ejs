@@ -1,0 +1,59 @@
+<%
+  // As mesmas perguntas alimentam a página e os dados estruturados (FAQPage) para o Google.
+  const perguntas = [
+    {
+      pergunta: 'Preciso criar uma conta para me inscrever?',
+      resposta: 'Não. Na página do evento, clique em "Inscrever-se" e informe seu nome completo, e-mail e turma. Leva menos de um minuto.',
+    },
+    {
+      pergunta: 'Como sei que minha inscrição deu certo?',
+      resposta: 'Logo depois de enviar, aparece a página "Obrigado!" com os dados do evento. Seu nome passa a constar na lista da coordenação. No dia, é só informar seu nome na entrada.',
+    },
+    {
+      pergunta: 'O evento está esgotado. Ainda consigo participar?',
+      resposta: 'As vagas são limitadas pela capacidade do local. Se alguém cancelar, a vaga volta a aparecer na página do evento. Você também pode falar com a coordenação pela página de contato.',
+    },
+    {
+      pergunta: 'Me inscrevi e não vou poder ir. Como cancelo?',
+      resposta: 'Avise a coordenação pela página de contato, informando o evento e o e-mail usado na inscrição. A coordenação remove sua inscrição e a vaga fica livre para outro colega.',
+    },
+    {
+      pergunta: 'Quem vê meus dados?',
+      resposta: 'Só a coordenação da escola, para organizar o evento e registrar a presença. Seus dados não aparecem para outros alunos nem são compartilhados. Os detalhes estão na política de privacidade.',
+    },
+  ];
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: perguntas.map((p) => ({ '@type': 'Question', name: p.pergunta, acceptedAnswer: { '@type': 'Answer', text: p.resposta } })),
+  };
+%>
+<%- include('../partials/header', {
+  titulo: 'Perguntas frequentes',
+  descricao: 'Como se inscrever nos eventos do Colégio Gori, cancelar uma inscrição e quem vê seus dados.',
+  trilha: [{ nome: 'Início', url: '/' }, { nome: 'Perguntas frequentes', url: '/perguntas-frequentes' }],
+  jsonLd: faqJsonLd,
+}) %>
+
+<section class="painel-medio">
+  <header class="cabecalho-pagina">
+    <h1>Perguntas frequentes</h1>
+    <p class="subtitulo">O que os alunos mais perguntam sobre as inscrições.</p>
+  </header>
+
+  <div class="perguntas">
+    <% perguntas.forEach((p, i) => { %>
+      <details class="pergunta" <%= i === 0 ? 'open' : '' %>>
+        <summary><%= p.pergunta %></summary>
+        <p><%= p.resposta %></p>
+      </details>
+    <% }) %>
+  </div>
+
+  <div class="caixa-chamada">
+    <p><strong>Não achou sua dúvida?</strong> A coordenação responde por e-mail.</p>
+    <a href="/contato" class="botao">Fale com a coordenação</a>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

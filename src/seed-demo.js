@@ -5,24 +5,6 @@ require('dotenv').config({ quiet: true });
 const db = require('./db');
 const inscricoesRepo = require('./repositories/inscricoesRepo');
 
-const { total } = db.prepare('SELECT COUNT(*) AS total FROM eventos').get();
-if (total > 0) {
-  console.error(`O banco já tem ${total} evento(s). Resete o banco antes (CLAUDE.md, seção 16.6).`);
-  process.exit(1);
-}
-
-const categoria = (nome) => {
-  const linha = db.prepare('SELECT id FROM categorias WHERE nome = ?').get(nome);
-  if (!linha) {
-    console.error(`Categoria "${nome}" não existe. Rode "npm run seed" primeiro.`);
-    process.exit(1);
-  }
-  return linha.id;
-};
-
-// Datas relativas a hoje, para a demonstração nunca ficar com eventos "vencidos".
-const diasAPartirDeHoje = (dias) => db.prepare("SELECT date('now', 'localtime', ?) AS data").get(`${dias} days`).data;
-
 const eventos = [
   {
     titulo: 'Feira de Ciências 2026',
@@ -69,42 +51,59 @@ const alunos = [
 ];
 const emailDe = (nome) => nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ /g, '.') + '@aluno.escola.com';
 
-const inserirEvento = db.prepare(`
-  INSERT INTO eventos (titulo, descricao, categoria_id, data_evento, hora_inicio, hora_fim, local, capacidade, status)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-`);
-
-const ids = eventos.map((e) => inserirEvento.run(
-  e.titulo, e.descricao, categoria(e.categoria), diasAPartirDeHoje(e.dias),
-  e.hora_inicio, e.hora_fim, e.local, e.capacidade, e.dias < 0 ? 'encerrado' : 'aberto',
-).lastInsertRowid);
-
-// Inscrições pela mesma função que o site usa, para respeitar todas as regras.
-// O evento que já passou (índice 6) recebe as inscrições direto no banco, como se tivessem sido feitas antes.
-const inscrever = (indiceEvento, indicesAlunos) => {
-  for (const i of indicesAlunos) {
-    const [nome, turma] = alunos[i];
-    const dados = { nome, email: emailDe(nome), turma };
-    if (indiceEvento === 6) {
-      let participante = db.prepare('SELECT id FROM participantes WHERE email = ?').get(dados.email);
-      if (!participante) {
-        participante = { id: db.prepare('INSERT INTO participantes (nome, email, turma) VALUES (?, ?, ?)').run(nome, dados.email, turma).lastInsertRowid };
-      }
-      db.prepare('INSERT INTO inscricoes (evento_id, participante_id, presenca_confirmada) VALUES (?, ?, ?)')
-        .run(ids[indiceEvento], participante.id, i % 3 === 0 ? 0 : 1);
-    } else {
-      const resultado = inscricoesRepo.inscrever(ids[indiceEvento], dados);
-      if (resultado.erro) throw new Error(`${eventos[indiceEvento].titulo}: ${resultado.erro}`);
-    }
+async function main() {
+  const { total } = await db.obter('SELECT COUNT(*) AS total FROM eventos');
+  if (total > 0) {
+    throw new Error(`O banco já tem ${total} evento(s). Resete o banco antes (CLAUDE.md, seção 16.6).`);
   }
-};
 
-inscrever(0, [0, 1, 2, 3, 4, 5, 6, 7, 8]);
-inscrever(1, [0, 1, 4, 9, 10, 11]);
-inscrever(4, [1, 3, 5, 6, 8, 10, 11, 2]); // futsal: 8 de 8 — aparece como "Esgotado"
-inscrever(5, [2, 7, 9]);
-inscrever(6, [0, 3, 4, 6, 9, 10]);
-// A "vaga única" (índice 2) fica sem ninguém: a primeira inscrição é feita ao vivo no pitch.
+  const idCategoria = {};
+  for (const c of await db.consultar('SELECT id, nome FROM categorias')) idCategoria[c.nome] = c.id;
 
-const { inscricoes } = db.prepare('SELECT COUNT(*) AS inscricoes FROM inscricoes').get();
-console.log(`Demonstração criada: ${ids.length} eventos, ${alunos.length} alunos, ${inscricoes} inscrições.`);
+  const ids = [];
+  for (const e of eventos) {
+    if (!idCategoria[e.categoria]) throw new Error(`Categoria "${e.categoria}" não existe. Rode "npm run seed" primeiro.`);
+    // Datas relativas a hoje, para a demonstração nunca ficar com eventos "vencidos".
+    const { data } = await db.obter("SELECT date('now', 'localtime', ?) AS data", [`${e.dias} days`]);
+    const r = await db.executar(`
+      INSERT INTO eventos (titulo, descricao, categoria_id, data_evento, hora_inicio, hora_fim, local, capacidade, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [e.titulo, e.descricao, idCategoria[e.categoria], data, e.hora_inicio, e.hora_fim, e.local, e.capacidade,
+      e.dias < 0 ? 'encerrado' : 'aberto']);
+    ids.push(r.id);
+  }
+
+  // Inscrições pela mesma função que o site usa, para respeitar todas as regras.
+  // O evento que já passou (índice 6) recebe as inscrições direto no banco, como se tivessem sido feitas antes.
+  const inscrever = async (indiceEvento, indicesAlunos) => {
+    for (const i of indicesAlunos) {
+      const [nome, turma] = alunos[i];
+      const dados = { nome, email: emailDe(nome), turma };
+      if (indiceEvento === 6) {
+        let participante = await db.obter('SELECT id FROM participantes WHERE email = ?', [dados.email]);
+        if (!participante) {
+          participante = { id: (await db.executar('INSERT INTO participantes (nome, email, turma) VALUES (?, ?, ?)', [nome, dados.email, turma])).id };
+        }
+        await db.executar('INSERT INTO inscricoes (evento_id, participante_id, presenca_confirmada) VALUES (?, ?, ?)',
+          [ids[indiceEvento], participante.id, i % 3 === 0 ? 0 : 1]);
+      } else {
+        const resultado = await inscricoesRepo.inscrever(ids[indiceEvento], dados);
+        if (resultado.erro) throw new Error(`${eventos[indiceEvento].titulo}: ${resultado.erro}`);
+      }
+    }
+  };
+
+  await inscrever(0, [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+  await inscrever(1, [0, 1, 4, 9, 10, 11]);
+  await inscrever(4, [1, 3, 5, 6, 8, 10, 11, 2]); // futsal: 8 de 8 — aparece como "Esgotado"
+  await inscrever(5, [2, 7, 9]);
+  await inscrever(6, [0, 3, 4, 6, 9, 10]);
+  // A "vaga única" (índice 2) fica sem ninguém: a primeira inscrição é feita ao vivo no pitch.
+
+  const { quantidade } = await db.obter('SELECT COUNT(*) AS quantidade FROM inscricoes');
+  console.log(`Demonstração criada: ${ids.length} eventos, ${alunos.length} alunos, ${quantidade} inscrições.`);
+}
+
+main()
+  .catch((erro) => { console.error(erro.message); process.exitCode = 1; })
+  .finally(() => db.fechar());

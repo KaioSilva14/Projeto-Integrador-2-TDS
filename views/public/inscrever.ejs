@@ -1,7 +1,10 @@
-<%- include('../partials/header', { titulo: 'Inscrição' }) %>
+<%- include('../partials/header', {
+  titulo: 'Inscrição — ' + evento.titulo,
+  descricao: 'Inscreva-se em ' + evento.titulo + ' informando nome, e-mail e turma.',
+  semIndexar: true,
+  trilha: [{ nome: 'Eventos', url: '/' }, { nome: evento.titulo, url: '/eventos/' + evento.id }, { nome: 'Inscrição', url: '/eventos/' + evento.id + '/inscrever' }],
+}) %>
 <% const aceita = !evento.inscricoes_encerradas && evento.vagas_ocupadas < evento.capacidade; %>
-
-<a href="/eventos/<%= evento.id %>" class="link-voltar">← Voltar para o evento</a>
 
 <section class="painel-estreito">
   <header class="cabecalho-pagina">
@@ -22,7 +25,10 @@
         <%= evento.inscricoes_encerradas ? 'As inscrições para este evento estão encerradas.' : 'As vagas deste evento esgotaram.' %>
       </div>
     <% } %>
-    <a href="/" class="botao botao-secundario">Ver outros eventos</a>
+    <div class="acoes">
+      <a href="/" class="botao botao-secundario">Ver outros eventos</a>
+      <a href="/contato" class="botao botao-secundario">Falar com a coordenação</a>
+    </div>
   <% } else { %>
     <form method="post" action="/eventos/<%= evento.id %>/inscrever" class="formulario">
       <div class="campo">
@@ -49,6 +55,7 @@
         <% if (erros.turma) { %><p class="erro-campo" id="erro-turma"><%= erros.turma %></p><% } %>
       </div>
 
+      <p class="info">Seus dados ficam visíveis só para a coordenação. <a href="/privacidade">Política de privacidade</a>.</p>
       <button type="submit" class="botao botao-largo">Confirmar inscrição</button>
     </form>
   <% } %>

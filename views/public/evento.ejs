@@ -1,7 +1,28 @@
-<%- include('../partials/header', { titulo: evento.titulo }) %>
-<% const restantes = evento.capacidade - evento.vagas_ocupadas; %>
-
-<a href="/" class="link-voltar">← Todos os eventos</a>
+<%
+  const restantes = evento.capacidade - evento.vagas_ocupadas;
+  const resumo = (evento.descricao || `${evento.categoria} no Colégio Gori`).replace(/\s+/g, ' ');
+  const descricaoMeta = `${formatarData(evento.data_evento)} às ${evento.hora_inicio}, ${evento.local}. ${resumo}`;
+  // Dados estruturados de evento (schema.org): o Google pode mostrar data e local na busca.
+  const eventoJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: evento.titulo,
+    description: resumo,
+    startDate: `${evento.data_evento}T${evento.hora_inicio}:00-03:00`,
+    ...(evento.hora_fim ? { endDate: `${evento.data_evento}T${evento.hora_fim}:00-03:00` } : {}),
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+    location: { '@type': 'Place', name: `${evento.local} — ${config.escola}`, address: config.cidade },
+    organizer: { '@type': 'Organization', name: config.escola },
+    offers: { '@type': 'Offer', price: 0, priceCurrency: 'BRL', availability: restantes > 0 && !evento.inscricoes_encerradas ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut' },
+  };
+%>
+<%- include('../partials/header', {
+  titulo: evento.titulo,
+  descricao: descricaoMeta,
+  trilha: [{ nome: 'Eventos', url: '/' }, { nome: evento.titulo, url: `/eventos/${evento.id}` }],
+  jsonLd: eventoJsonLd,
+}) %>
 
 <article class="detalhe">
   <header class="detalhe-cabecalho">
@@ -35,12 +56,13 @@
   <div class="detalhe-acao">
     <% if (evento.inscricoes_encerradas) { %>
       <%- include('../partials/badge-evento', { evento }) %>
-      <p class="info">As inscrições para este evento estão encerradas.</p>
+      <p class="info">As inscrições para este evento estão encerradas. <a href="/">Veja os outros eventos abertos</a>.</p>
     <% } else if (restantes <= 0) { %>
       <%- include('../partials/badge-evento', { evento }) %>
-      <p class="info">As vagas deste evento esgotaram.</p>
+      <p class="info">As vagas deste evento esgotaram. Se uma vaga for liberada, ela volta a aparecer aqui. Dúvidas? <a href="/contato">Fale com a coordenação</a>.</p>
     <% } else { %>
       <a href="/eventos/<%= evento.id %>/inscrever" class="botao botao-largo">Inscrever-se</a>
+      <p class="info">Leva menos de um minuto. <a href="/perguntas-frequentes">Dúvidas sobre a inscrição?</a></p>
     <% } %>
   </div>
 </article>

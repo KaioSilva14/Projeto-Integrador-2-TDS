@@ -1,0 +1,72 @@
+<%- include('../partials/header', {
+  titulo: 'Contato',
+  descricao: 'Fale com a coordenação do Colégio Gori: dúvidas sobre eventos, problemas na inscrição ou sugestões.',
+  trilha: [{ nome: 'Início', url: '/' }, { nome: 'Contato', url: '/contato' }],
+}) %>
+<% const erroEm = (campo) => erros[campo] ? `aria-invalid="true" aria-describedby="erro-${campo}"` : ''; %>
+
+<div class="duas-colunas duas-colunas-contato">
+  <section>
+    <header class="cabecalho-pagina">
+      <h1>Fale com a coordenação</h1>
+      <p class="subtitulo">Dúvida sobre um evento, problema na inscrição ou sugestão? Escreva abaixo. A resposta chega no e-mail que você informar.</p>
+    </header>
+
+    <% if (Object.keys(erros).length > 0) { %>
+      <div class="aviso aviso-erro" role="alert">Corrija os campos marcados abaixo para enviar.</div>
+    <% } %>
+
+    <form method="post" action="/contato" class="formulario">
+      <div class="campo">
+        <label for="nome">Nome completo</label>
+        <input type="text" id="nome" name="nome" value="<%= valores.nome || '' %>" maxlength="100" autocomplete="name" required <%- erroEm('nome') %>>
+        <% if (erros.nome) { %><p class="erro-campo" id="erro-nome"><%= erros.nome %></p><% } %>
+      </div>
+
+      <div class="campo">
+        <label for="email">E-mail para resposta</label>
+        <input type="email" id="email" name="email" value="<%= valores.email || '' %>" maxlength="120" autocomplete="email" inputmode="email" required <%- erroEm('email') %>>
+        <% if (erros.email) { %><p class="erro-campo" id="erro-email"><%= erros.email %></p><% } %>
+      </div>
+
+      <div class="campo">
+        <label for="assunto">Assunto</label>
+        <select id="assunto" name="assunto" required <%- erroEm('assunto') %>>
+          <option value="">Escolha…</option>
+          <% assuntos.forEach(a => { %>
+            <option <%= valores.assunto === a ? 'selected' : '' %>><%= a %></option>
+          <% }) %>
+        </select>
+        <% if (erros.assunto) { %><p class="erro-campo" id="erro-assunto"><%= erros.assunto %></p><% } %>
+      </div>
+
+      <div class="campo">
+        <label for="mensagem">Mensagem</label>
+        <textarea id="mensagem" name="mensagem" rows="6" minlength="10" maxlength="1000" data-contador required <%- erroEm('mensagem') %>><%= valores.mensagem || '' %></textarea>
+        <% if (erros.mensagem) { %><p class="erro-campo" id="erro-mensagem"><%= erros.mensagem %></p><% } %>
+      </div>
+
+      <%# Armadilha para robôs de spam: pessoas não veem este campo e o deixam vazio. %>
+      <div class="visualmente-oculto" aria-hidden="true">
+        <label for="site">Não preencha este campo</label>
+        <input type="text" id="site" name="site" tabindex="-1" autocomplete="off">
+      </div>
+
+      <p class="info">Usamos seus dados só para responder esta mensagem. <a href="/privacidade">Política de privacidade</a>.</p>
+      <button type="submit" class="botao botao-largo">Enviar mensagem</button>
+    </form>
+  </section>
+
+  <aside class="caixa-lateral" aria-labelledby="titulo-escola">
+    <h2 id="titulo-escola" class="titulo-secao"><%= config.escola %></h2>
+    <p><%= config.cidade %></p>
+    <% if (config.contato.endereco) { %><p><%= config.contato.endereco %></p><% } %>
+    <% if (config.contato.telefone) { %><p>Telefone: <a href="tel:<%= config.contato.telefone.replace(/[^\d+]/g, '') %>"><%= config.contato.telefone %></a></p><% } %>
+    <% if (config.contato.email) { %><p>E-mail: <a href="mailto:<%= config.contato.email %>"><%= config.contato.email %></a></p><% } %>
+
+    <h2 class="titulo-secao">Antes de escrever</h2>
+    <p>Talvez sua dúvida já esteja respondida nas <a href="/perguntas-frequentes">perguntas frequentes</a>.</p>
+  </aside>
+</div>
+
+<%- include('../partials/footer') %>

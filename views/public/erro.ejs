@@ -1,8 +1,14 @@
-<%- include('../partials/header', { titulo: 'Algo deu errado' }) %>
+<%- include('../partials/header', { titulo: 'Algo deu errado', semIndexar: true }) %>
 
-<div class="vazio">
-  <p><strong>Algo deu errado do nosso lado.</strong></p>
-  <p>Tente de novo em alguns instantes. <a href="/">Voltar para os eventos</a></p>
-</div>
+<section class="pagina-erro">
+  <p class="pagina-erro-codigo" aria-hidden="true">Ops</p>
+  <h1>Algo deu errado do nosso lado</h1>
+  <p class="subtitulo">Não foi nada que você fez. Espere alguns instantes e tente de novo — se estava se inscrevendo, confira na página do evento se a inscrição já foi registrada antes de enviar outra vez.</p>
+
+  <div class="acoes acoes-centro">
+    <a href="/" class="botao">Voltar para os eventos</a>
+  </div>
+  <p class="info">Se o problema continuar, <a href="/contato">avise a coordenação</a>.</p>
+</section>
 
 <%- include('../partials/footer') %>

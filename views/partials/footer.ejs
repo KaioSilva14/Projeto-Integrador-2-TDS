@@ -1,9 +1,34 @@
+<% const cfgRodape = locals.config || {}; %>
   </main>
   <footer class="rodape">
+    <div class="container rodape-grade">
+      <div class="rodape-marca">
+        <img src="/img/logo-gori.svg" alt="Logo do Colégio Gori" width="64" height="64" loading="lazy" decoding="async">
+        <p>
+          <strong><%= cfgRodape.escola || 'Colégio Estadual José Luiz Gori' %></strong><br>
+          <%= cfgRodape.cidade || 'Mandaguari/PR' %>
+        </p>
+      </div>
+      <nav aria-label="Links do rodapé">
+        <h2 class="rodape-titulo">Navegue</h2>
+        <ul class="rodape-links">
+          <li><a href="/">Próximos eventos</a></li>
+          <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
+          <li><a href="/contato">Fale com a coordenação</a></li>
+          <li><a href="/privacidade">Política de privacidade</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="rodape-titulo">Para a coordenação</h2>
+        <ul class="rodape-links">
+          <li><a href="/admin/login">Área do organizador</a></li>
+        </ul>
+      </div>
+    </div>
     <div class="container">
-      Colégio Estadual José Luiz Gori · Mandaguari/PR
+      <p class="rodape-final">Projeto Integrador · 2º TDS · Grupo 7</p>
     </div>
   </footer>
-  <script src="/js/confirmar.js"></script>
+  <script src="/js/site.js" defer></script>
 </body>
 </html>

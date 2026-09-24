@@ -27,17 +27,19 @@
     <table class="tabela">
       <thead>
         <tr>
-          <th scope="col">Nome</th>
+          <th scope="col">Aluno</th>
           <th scope="col">Presença</th>
-          <th scope="col">Turma</th>
-          <th scope="col">E-mail</th>
-          <th scope="col">Inscrição</th>
+          <th scope="col">Inscrito em</th>
+          <th scope="col"><span class="visualmente-oculto">Ações</span></th>
         </tr>
       </thead>
       <tbody>
         <% inscritos.forEach(inscrito => { %>
           <tr id="inscricao-<%= inscrito.id %>" class="<%= inscrito.presenca_confirmada ? 'linha-presente' : '' %>">
-            <td class="tabela-titulo"><%= inscrito.nome %></td>
+            <td>
+              <span class="tabela-titulo"><%= inscrito.nome %></span>
+              <span class="info"><%= inscrito.turma %> · <%= inscrito.email %></span>
+            </td>
             <td>
               <form method="post" action="/admin/inscricoes/<%= inscrito.id %>/presenca">
                 <% if (inscrito.presenca_confirmada) { %>
@@ -47,9 +49,13 @@
                 <% } %>
               </form>
             </td>
-            <td class="sem-quebra"><%= inscrito.turma %></td>
-            <td class="info"><%= inscrito.email %></td>
             <td class="info sem-quebra"><%= formatarDataHora(inscrito.data_inscricao) %></td>
+            <td>
+              <form method="post" action="/admin/inscricoes/<%= inscrito.id %>/excluir"
+                    data-confirmar="Remover a inscrição de <%= inscrito.nome %>? A vaga fica livre para outra pessoa.">
+                <button type="submit" class="botao botao-perigo botao-pequeno" aria-label="Remover inscrição de <%= inscrito.nome %>">Remover</button>
+              </form>
+            </td>
           </tr>
         <% }) %>
       </tbody>

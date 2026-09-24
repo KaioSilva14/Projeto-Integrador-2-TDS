@@ -1,0 +1,45 @@
+<%- include('../partials/header', {
+  titulo: 'Política de privacidade',
+  descricao: 'Quais dados o site de eventos do Colégio Gori coleta, por que, quem vê e como pedir a exclusão.',
+  trilha: [{ nome: 'Início', url: '/' }, { nome: 'Política de privacidade', url: '/privacidade' }],
+}) %>
+
+<article class="painel-medio texto-longo">
+  <header class="cabecalho-pagina">
+    <h1>Política de privacidade</h1>
+    <p class="subtitulo">Última atualização: 24/09/2026</p>
+  </header>
+
+  <p>Este site organiza as inscrições nos eventos do <%= config.escola %> (<%= config.cidade %>). Esta página explica, em linguagem simples, o que fazemos com os seus dados, conforme a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).</p>
+
+  <h2>Quais dados coletamos</h2>
+  <ul>
+    <li><strong>Na inscrição em um evento:</strong> nome completo, e-mail e turma.</li>
+    <li><strong>Na página de contato:</strong> nome, e-mail e o texto da mensagem.</li>
+  </ul>
+  <p>Não pedimos CPF, telefone, endereço, foto nem qualquer outro dado. Não usamos ferramentas de rastreamento nem publicidade.</p>
+
+  <h2>Para que usamos</h2>
+  <ul>
+    <li>Controlar as vagas de cada evento e impedir inscrições repetidas.</li>
+    <li>Fazer a chamada (registro de presença) no dia do evento.</li>
+    <li>Responder às mensagens enviadas pela página de contato.</li>
+  </ul>
+
+  <h2>Quem vê os seus dados</h2>
+  <p>Somente a coordenação da escola, por uma área protegida por senha. Outros alunos e visitantes do site não veem nomes, e-mails nem turmas. Não vendemos nem compartilhamos seus dados com empresas.</p>
+
+  <h2>Onde ficam guardados</h2>
+  <p>Em um banco de dados em nuvem usado pelo site, com acesso restrito. Os dados de inscrição são mantidos enquanto forem úteis para a organização dos eventos do ano letivo.</p>
+
+  <h2>Cookies</h2>
+  <p>O site usa um único cookie, necessário para o funcionamento: ele guarda temporariamente a confirmação da sua inscrição e, para a coordenação, a sessão de login. Não há cookies de propaganda ou de análise.</p>
+
+  <h2>Seus direitos</h2>
+  <p>Você (ou seu responsável, se for menor de idade) pode pedir para ver, corrigir ou excluir seus dados a qualquer momento. Basta escrever pela <a href="/contato">página de contato</a> informando o e-mail usado.</p>
+
+  <h2>Dúvidas</h2>
+  <p>Fale com a coordenação pela <a href="/contato">página de contato</a><% if (config.contato.email) { %> ou pelo e-mail <a href="mailto:<%= config.contato.email %>"><%= config.contato.email %></a><% } %>.</p>
+</article>
+
+<%- include('../partials/footer') %>

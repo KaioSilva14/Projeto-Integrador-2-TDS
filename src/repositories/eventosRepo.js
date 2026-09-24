@@ -28,52 +28,59 @@ function listarAbertos(categoriaId) {
   }
 
   sql += ' GROUP BY e.id ORDER BY e.data_evento, e.hora_inicio';
-  return db.prepare(sql).all(...parametros);
+  return db.consultar(sql, parametros);
 }
 
 // Painel: todos os eventos, os próximos primeiro e os que já passaram no fim.
 function listarTodos() {
-  return db.prepare(`SELECT ${COLUNAS} ${JUNCOES}
+  return db.consultar(`SELECT ${COLUNAS} ${JUNCOES}
      GROUP BY e.id
-     ORDER BY e.data_evento < date('now', 'localtime'), e.data_evento, e.hora_inicio`).all();
+     ORDER BY e.data_evento < date('now', 'localtime'), e.data_evento, e.hora_inicio`);
 }
 
 function buscarPorId(id) {
-  return db.prepare(`SELECT ${COLUNAS} ${JUNCOES} WHERE e.id = ? GROUP BY e.id`).get(id);
+  return db.obter(`SELECT ${COLUNAS} ${JUNCOES} WHERE e.id = ? GROUP BY e.id`, [id]);
 }
 
-function criar(dados) {
-  return db.prepare(`
+async function criar(dados) {
+  const d = paraBanco(dados);
+  const resultado = await db.executar(`
     INSERT INTO eventos (titulo, descricao, categoria_id, data_evento, hora_inicio, hora_fim, local, capacidade)
-    VALUES (@titulo, @descricao, @categoria_id, @data_evento, @hora_inicio, @hora_fim, @local, @capacidade)
-  `).run(paraBanco(dados)).lastInsertRowid;
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `, [d.titulo, d.descricao, d.categoria_id, d.data_evento, d.hora_inicio, d.hora_fim, d.local, d.capacidade]);
+  return resultado.id;
 }
 
-function atualizar(id, dados) {
-  db.prepare(`
+async function atualizar(id, dados) {
+  const d = paraBanco(dados);
+  await db.executar(`
     UPDATE eventos
-       SET titulo = @titulo, descricao = @descricao, categoria_id = @categoria_id,
-           data_evento = @data_evento, hora_inicio = @hora_inicio, hora_fim = @hora_fim,
-           local = @local, capacidade = @capacidade, status = @status
-     WHERE id = @id
-  `).run({ ...paraBanco(dados), id });
+       SET titulo = ?, descricao = ?, categoria_id = ?, data_evento = ?, hora_inicio = ?,
+           hora_fim = ?, local = ?, capacidade = ?, status = ?
+     WHERE id = ?
+  `, [d.titulo, d.descricao, d.categoria_id, d.data_evento, d.hora_inicio, d.hora_fim, d.local, d.capacidade, d.status, id]);
 }
 
-// As inscrições do evento somem junto (ON DELETE CASCADE — RN04).
-function excluir(id) {
-  db.prepare('DELETE FROM eventos WHERE id = ?').run(id);
+// RN04: apaga as inscrições e o evento juntos, numa transação.
+// O ON DELETE CASCADE do schema continua lá como segunda defesa.
+async function excluir(id) {
+  await db.transacao(async (tx) => {
+    await tx.executar('DELETE FROM inscricoes WHERE evento_id = ?', [id]);
+    await tx.executar('DELETE FROM eventos WHERE id = ?', [id]);
+  });
 }
 
 // Números do painel do organizador.
 function resumo() {
-  return db.prepare(`
+  return db.obter(`
     SELECT
       (SELECT COUNT(*) FROM eventos
         WHERE status = 'aberto' AND data_evento >= date('now', 'localtime')) AS eventos_abertos,
       (SELECT COUNT(*) FROM eventos) AS eventos_total,
       (SELECT COUNT(*) FROM inscricoes) AS inscricoes_total,
-      (SELECT COUNT(*) FROM inscricoes WHERE presenca_confirmada = 1) AS presencas_total
-  `).get();
+      (SELECT COUNT(*) FROM inscricoes WHERE presenca_confirmada = 1) AS presencas_total,
+      (SELECT COUNT(*) FROM mensagens WHERE lida = 0) AS mensagens_novas
+  `);
 }
 
 // Campos opcionais vazios viram NULL no banco; status só existe na edição.

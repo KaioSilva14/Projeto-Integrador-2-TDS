@@ -44,7 +44,7 @@
 
       <div class="campo">
         <label for="descricao">Descrição <span class="opcional">(opcional)</span></label>
-        <textarea id="descricao" name="descricao" rows="4" maxlength="2000" <%- atributosErro('descricao') %>><%= valores.descricao || '' %></textarea>
+        <textarea id="descricao" name="descricao" rows="4" maxlength="2000" data-contador <%- atributosErro('descricao') %>><%= valores.descricao || '' %></textarea>
         <% if (erros.descricao) { %><p class="erro-campo" id="erro-descricao"><%= erros.descricao %></p><% } %>
       </div>
     </fieldset>

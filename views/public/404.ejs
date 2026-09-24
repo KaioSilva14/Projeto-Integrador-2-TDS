@@ -1,8 +1,15 @@
-<%- include('../partials/header', { titulo: 'Página não encontrada' }) %>
+<%- include('../partials/header', { titulo: 'Página não encontrada', semIndexar: true }) %>
 
-<div class="vazio">
-  <p><strong>Página não encontrada.</strong></p>
-  <p><a href="/">Voltar para os eventos</a></p>
-</div>
+<section class="pagina-erro">
+  <p class="pagina-erro-codigo" aria-hidden="true">404</p>
+  <h1>Esta página não existe</h1>
+  <p class="subtitulo">O endereço pode ter sido digitado errado, ou o evento que você procurava foi removido.</p>
+
+  <div class="acoes acoes-centro">
+    <a href="/" class="botao">Ver próximos eventos</a>
+    <a href="/perguntas-frequentes" class="botao botao-secundario">Perguntas frequentes</a>
+  </div>
+  <p class="info">Acha que é um erro do site? <a href="/contato">Conte para a coordenação</a>.</p>
+</section>
 
 <%- include('../partials/footer') %>

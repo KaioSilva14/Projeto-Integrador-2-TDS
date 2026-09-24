@@ -1,35 +1,110 @@
+<%#
+  Cabeçalho de todas as páginas. Parâmetros opcionais do include:
+    titulo      — título da página (aba do navegador e redes sociais)
+    descricao   — meta description (até ~160 caracteres)
+    trilha      — breadcrumbs: [{ nome, url }, ...]; o último é a página atual
+    semIndexar  — true para páginas que o Google não deve mostrar
+    jsonLd      — dados estruturados extras (objeto) para o Google
+  Usa locals.* porque a página de erro pode ser mostrada antes do middleware que preenche os dados.
+%>
+<%
+  const cfg = locals.config || {};
+  const base = locals.urlBase || '';
+  const caminhoAtual = locals.caminho || '/';
+  const logado = locals.usuario || null;
+  const tituloCompleto = locals.titulo ? `${titulo} · ${cfg.nomeCurto || 'Eventos Escolares'}` : (cfg.nomeSite || 'Eventos Escolares');
+  const descricaoPagina = (locals.descricao || cfg.descricaoPadrao || '').slice(0, 160);
+  const naoIndexar = locals.semIndexar || caminhoAtual.startsWith('/admin');
+  const urlCanonica = base + caminhoAtual;
+  const imagemSocial = base + '/img/compartilhar.jpg';
+%>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= locals.titulo ? titulo + ' · ' : '' %>Eventos Escolares</title>
+  <title><%= tituloCompleto %></title>
+  <meta name="description" content="<%= descricaoPagina %>">
+  <% if (naoIndexar) { %><meta name="robots" content="noindex, nofollow"><% } else { %><link rel="canonical" href="<%= urlCanonica %>"><% } %>
+  <meta name="theme-color" content="#1E1459">
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="<%= cfg.nomeSite %>">
+  <meta property="og:title" content="<%= tituloCompleto %>">
+  <meta property="og:description" content="<%= descricaoPagina %>">
+  <meta property="og:url" content="<%= urlCanonica %>">
+  <meta property="og:image" content="<%= imagemSocial %>">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Logo do Colégio Gori e o texto Eventos Escolares">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+
+  <% if (locals.trilha && trilha.length) { %>
+  <script type="application/ld+json"><%- JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: trilha.map((item, i) => ({ '@type': 'ListItem', position: i + 1, name: item.nome, item: base + item.url })),
+  }).replace(/</g, '\\u003c') %></script>
+  <% } %>
+  <% if (locals.jsonLd) { %>
+  <script type="application/ld+json"><%- JSON.stringify(jsonLd).replace(/</g, '\\u003c') %></script>
+  <% } %>
 </head>
 <body>
+  <a href="#conteudo" class="pular-conteudo">Pular para o conteúdo</a>
   <header class="topo">
     <div class="container topo-conteudo">
-      <a href="<%= usuario ? '/admin' : '/' %>" class="marca">Eventos Escolares</a>
+      <a href="<%= logado ? '/admin' : '/' %>" class="marca">
+        <img src="/favicon.svg" alt="" width="36" height="36" class="marca-logo">
+        <span class="marca-texto">
+          <span class="marca-nome">Eventos Escolares</span>
+          <span class="marca-escola">Colégio Gori</span>
+        </span>
+      </a>
       <nav class="menu" aria-label="Menu principal">
-        <% if (usuario) {
-             const ativo = (inicio) => caminho === inicio || (inicio !== '/admin' && caminho.startsWith(inicio)); %>
-          <a href="/admin" <%- ativo('/admin') ? 'aria-current="page"' : '' %>>Painel</a>
-          <a href="/admin/eventos" <%- ativo('/admin/eventos') ? 'aria-current="page"' : '' %>>Eventos</a>
-          <a href="/admin/categorias" <%- ativo('/admin/categorias') ? 'aria-current="page"' : '' %>>Categorias</a>
+        <%
+          const ativo = (inicio) => caminhoAtual === inicio || (inicio !== '/admin' && inicio !== '/' && caminhoAtual.startsWith(inicio));
+          const atual = (inicio) => ativo(inicio) ? 'aria-current="page"' : '';
+        %>
+        <% if (logado) { %>
+          <a href="/admin" <%- atual('/admin') %>>Painel</a>
+          <a href="/admin/eventos" <%- atual('/admin/eventos') %>>Eventos</a>
+          <a href="/admin/categorias" <%- atual('/admin/categorias') %>>Categorias</a>
+          <a href="/admin/mensagens" <%- atual('/admin/mensagens') %>>Mensagens<% if (locals.mensagensNovas) { %> <span class="contador-menu" aria-label="<%= mensagensNovas %> não lidas"><%= mensagensNovas %></span><% } %></a>
           <a href="/">Ver site</a>
           <form method="post" action="/admin/logout" class="form-sair">
             <button type="submit" class="link-botao">Sair</button>
           </form>
         <% } else { %>
-          <a href="/admin/login">Área do organizador</a>
+          <a href="/" <%- atual('/') %>>Eventos</a>
+          <a href="/perguntas-frequentes" <%- atual('/perguntas-frequentes') %>>Dúvidas</a>
+          <a href="/contato" <%- atual('/contato') %>>Contato</a>
+          <a href="/admin/login" class="menu-organizador">Organizador</a>
         <% } %>
       </nav>
     </div>
   </header>
-  <main class="container">
-    <% if (aviso) { %>
+  <main class="container" id="conteudo">
+    <% if (locals.trilha && trilha.length) { %>
+      <nav class="trilha" aria-label="Você está em">
+        <ol>
+          <% trilha.forEach((item, i) => { %>
+            <li><% if (i < trilha.length - 1) { %><a href="<%= item.url %>"><%= item.nome %></a><% } else { %><span aria-current="page"><%= item.nome %></span><% } %></li>
+          <% }) %>
+        </ol>
+      </nav>
+    <% } %>
+    <% if (locals.aviso) { %>
       <div class="aviso aviso-<%= aviso.tipo %>" role="status"><%= aviso.texto %></div>
     <% } %>

@@ -46,3 +46,14 @@ CREATE TABLE IF NOT EXISTS inscricoes (
   FOREIGN KEY (participante_id) REFERENCES participantes(id),
   UNIQUE (evento_id, participante_id)
 );
+
+-- Mensagens da página de contato (lidas só pelo organizador).
+CREATE TABLE IF NOT EXISTS mensagens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nome TEXT NOT NULL,
+  email TEXT NOT NULL,
+  assunto TEXT NOT NULL,
+  mensagem TEXT NOT NULL,
+  lida INTEGER NOT NULL DEFAULT 0 CHECK (lida IN (0,1)),
+  criado_em TEXT DEFAULT CURRENT_TIMESTAMP
+);

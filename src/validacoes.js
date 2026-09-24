@@ -116,6 +116,35 @@ function validarCategoria(corpo) {
   return { valores, erros };
 }
 
+const ASSUNTOS = ['Dúvida sobre um evento', 'Problema na inscrição', 'Sugestão de evento', 'Outro'];
+
+function validarContato(corpo) {
+  const valores = {
+    nome: texto(corpo.nome),
+    email: texto(corpo.email).toLowerCase(),
+    assunto: ASSUNTOS.includes(corpo.assunto) ? corpo.assunto : '',
+    mensagem: texto(corpo.mensagem),
+  };
+  const erros = {};
+
+  if (valores.nome.length < 3 || valores.nome.length > 100) {
+    erros.nome = 'Informe seu nome completo.';
+  }
+  if (!emailValido(valores.email) || valores.email.length > 120) {
+    erros.email = 'Informe um e-mail válido para podermos responder.';
+  }
+  if (!valores.assunto) {
+    erros.assunto = 'Escolha o assunto.';
+  }
+  if (valores.mensagem.length < 10) {
+    erros.mensagem = 'Escreva sua mensagem (pelo menos 10 caracteres).';
+  } else if (valores.mensagem.length > 1000) {
+    erros.mensagem = 'A mensagem pode ter até 1000 caracteres.';
+  }
+
+  return { valores, erros };
+}
+
 function temErros(erros) {
   return Object.keys(erros).length > 0;
 }
@@ -126,5 +155,7 @@ module.exports = {
   validarInscricao,
   validarEvento,
   validarCategoria,
+  validarContato,
+  ASSUNTOS,
   temErros,
 };

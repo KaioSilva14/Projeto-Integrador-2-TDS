@@ -1,0 +1,42 @@
+<%- include('../partials/header', { titulo: 'Mensagens' }) %>
+
+<section class="cabecalho-pagina">
+  <h1>Mensagens</h1>
+  <p class="subtitulo">Enviadas pela página de contato. Responda pelo seu e-mail e marque como lida.</p>
+</section>
+
+<% if (mensagens.length === 0) { %>
+  <div class="vazio">
+    <p><strong>Nenhuma mensagem ainda.</strong></p>
+    <p>O que os alunos enviarem pela página <a href="/contato">Contato</a> aparece aqui.</p>
+  </div>
+<% } else { %>
+  <ul class="lista-mensagens">
+    <% mensagens.forEach(m => { %>
+      <li id="mensagem-<%= m.id %>" class="mensagem <%= m.lida ? 'mensagem-lida' : '' %>">
+        <div class="mensagem-cabecalho">
+          <div>
+            <% if (!m.lida) { %><span class="badge badge-disponivel">Nova</span><% } %>
+            <strong class="mensagem-assunto"><%= m.assunto %></strong>
+          </div>
+          <span class="info"><%= formatarDataHora(m.criado_em) %></span>
+        </div>
+        <p class="info">
+          <%= m.nome %> · <a href="mailto:<%= m.email %>?subject=<%= encodeURIComponent('Re: ' + m.assunto) %>"><%= m.email %></a>
+        </p>
+        <p class="mensagem-texto"><%= m.mensagem %></p>
+        <div class="acoes">
+          <a href="mailto:<%= m.email %>?subject=<%= encodeURIComponent('Re: ' + m.assunto) %>" class="botao botao-pequeno">Responder por e-mail</a>
+          <form method="post" action="/admin/mensagens/<%= m.id %>/lida">
+            <button type="submit" class="botao botao-secundario botao-pequeno"><%= m.lida ? 'Marcar como não lida' : 'Marcar como lida' %></button>
+          </form>
+          <form method="post" action="/admin/mensagens/<%= m.id %>/excluir" data-confirmar="Excluir a mensagem de <%= m.nome %>? Não dá para desfazer.">
+            <button type="submit" class="botao botao-perigo botao-pequeno">Excluir</button>
+          </form>
+        </div>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<%- include('../partials/footer') %>

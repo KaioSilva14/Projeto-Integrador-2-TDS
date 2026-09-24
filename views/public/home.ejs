@@ -1,44 +1,58 @@
-<%- include('../partials/header', { titulo: 'Próximos eventos' }) %>
+<%- include('../partials/header', { titulo: null }) %>
 
-<section class="cabecalho-pagina">
-  <h1>Próximos eventos</h1>
-  <p class="subtitulo">Escolha um evento e garanta sua vaga. Não precisa criar conta.</p>
+<section class="destaque">
+  <div class="destaque-texto">
+    <p class="destaque-rotulo">Colégio Estadual José Luiz Gori · Mandaguari/PR</p>
+    <h1>Os eventos da escola, num só lugar</h1>
+    <p class="destaque-descricao">Palestras, feiras, competições e reuniões. Escolha um evento e garanta sua vaga em segundos, sem criar conta.</p>
+    <div class="acoes">
+      <a href="#eventos" class="botao">Ver próximos eventos</a>
+      <a href="/perguntas-frequentes" class="botao botao-secundario">Como funciona</a>
+    </div>
+  </div>
+  <img src="/img/logo-gori.svg" alt="Logo do Colégio Gori" width="176" height="176" class="destaque-logo" fetchpriority="high">
 </section>
 
-<form method="get" action="/" class="filtro">
-  <label for="categoria">Categoria</label>
-  <select name="categoria" id="categoria" onchange="this.form.submit()">
-    <option value="">Todas</option>
-    <% categorias.forEach(c => { %>
-      <option value="<%= c.id %>" <%= c.id === categoriaSelecionada ? 'selected' : '' %>><%= c.nome %></option>
-    <% }) %>
-  </select>
-  <noscript><button type="submit" class="botao botao-secundario">Filtrar</button></noscript>
-</form>
+<section id="eventos" class="secao-eventos" aria-labelledby="titulo-eventos">
+  <div class="cabecalho-com-acao">
+    <h2 id="titulo-eventos" class="titulo-secao-grande">Próximos eventos</h2>
 
-<% if (eventos.length === 0) { %>
-  <div class="vazio">
-    <% if (categoriaSelecionada) { %>
-      <p><strong>Nenhum evento aberto nesta categoria.</strong></p>
-      <p><a href="/">Ver todas as categorias</a></p>
-    <% } else { %>
-      <p><strong>Nenhum evento aberto no momento.</strong></p>
-      <p>Quando a coordenação publicar um evento, ele aparece aqui.</p>
-    <% } %>
+    <form method="get" action="/#eventos" class="filtro">
+      <label for="categoria">Categoria</label>
+      <select name="categoria" id="categoria" onchange="this.form.submit()">
+        <option value="">Todas</option>
+        <% categorias.forEach(c => { %>
+          <option value="<%= c.id %>" <%= c.id === categoriaSelecionada ? 'selected' : '' %>><%= c.nome %></option>
+        <% }) %>
+      </select>
+      <noscript><button type="submit" class="botao botao-secundario botao-pequeno">Filtrar</button></noscript>
+    </form>
   </div>
-<% } else { %>
-  <ul class="lista-eventos">
-    <% eventos.forEach(evento => { %>
-      <li class="card">
-        <a href="/eventos/<%= evento.id %>" class="card-link">
-          <span class="categoria"><%= evento.categoria %></span>
-          <h2><%= evento.titulo %></h2>
-          <p class="info"><%= formatarData(evento.data_evento) %> · <%= evento.hora_inicio %> · <%= evento.local %></p>
-          <%- include('../partials/badge-evento', { evento }) %>
-        </a>
-      </li>
-    <% }) %>
-  </ul>
-<% } %>
+
+  <% if (eventos.length === 0) { %>
+    <div class="vazio">
+      <% if (categoriaSelecionada) { %>
+        <p><strong>Nenhum evento aberto nesta categoria.</strong></p>
+        <p><a href="/#eventos">Ver todas as categorias</a></p>
+      <% } else { %>
+        <p><strong>Nenhum evento aberto no momento.</strong></p>
+        <p>Quando a coordenação publicar um evento, ele aparece aqui. Tem uma sugestão? <a href="/contato">Fale com a coordenação</a>.</p>
+      <% } %>
+    </div>
+  <% } else { %>
+    <ul class="lista-eventos">
+      <% eventos.forEach(evento => { %>
+        <li class="card">
+          <a href="/eventos/<%= evento.id %>" class="card-link">
+            <span class="categoria"><%= evento.categoria %></span>
+            <h3><%= evento.titulo %></h3>
+            <p class="info"><%= formatarData(evento.data_evento) %> · <%= evento.hora_inicio %> · <%= evento.local %></p>
+            <%- include('../partials/badge-evento', { evento }) %>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
 
 <%- include('../partials/footer') %>

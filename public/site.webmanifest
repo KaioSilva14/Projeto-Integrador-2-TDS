@@ -1,0 +1,14 @@
+{
+  "name": "Eventos Escolares — Colégio Gori",
+  "short_name": "Eventos Gori",
+  "description": "Eventos do Colégio Estadual José Luiz Gori, em Mandaguari/PR.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E1459",
+  "icons": [
+    { "src": "/img/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/img/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

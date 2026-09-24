@@ -1,0 +1,14 @@
+<%- include('../partials/header', { titulo: 'Mensagem enviada', semIndexar: true }) %>
+
+<section class="painel-estreito confirmacao">
+  <div class="confirmacao-selo" aria-hidden="true">✓</div>
+  <h1>Obrigado, <%= primeiroNome %>!</h1>
+  <p class="subtitulo">Sua mensagem chegou à coordenação. A resposta vai para o e-mail que você informou.</p>
+
+  <div class="acoes acoes-centro">
+    <a href="/" class="botao">Ver próximos eventos</a>
+    <a href="/perguntas-frequentes" class="botao botao-secundario">Perguntas frequentes</a>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

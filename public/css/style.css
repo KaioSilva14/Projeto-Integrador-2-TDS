@@ -19,6 +19,9 @@
   --cor-borda: #E2E8F0;          /* divisórias e cards (decorativo) */
   --cor-borda-campo: #8391A5;    /* contorno de campo: 3.2:1 no branco (WCAG 1.4.11) */
   --cor-destaque-fundo: #EFF6FF; /* linha da tabela recém-alterada */
+  --cor-escola-turquesa: #3BD7C9;         /* fundo do logo — só decorativo */
+  --cor-escola-turquesa-escuro: #0F8F85;  /* só texto GRANDE (3.8:1 no fundo claro; texto normal precisa de 4.5:1) */
+  --cor-escola-azul: #1E1459;             /* azul-marinho do logo: 15:1 no branco */
 
   --raio: 12px;
   --raio-campo: 8px;
@@ -52,6 +55,7 @@ body {
 h1,
 h2,
 h3 {
+  text-wrap: balance; /* evita uma palavra sozinha na última linha */
   font-family: var(--fonte-titulo);
   line-height: 1.25;
   margin: 0;
@@ -93,11 +97,35 @@ main.container {
 }
 
 .marca {
-  font-family: var(--fonte-titulo);
-  font-weight: 700;
-  font-size: 1.125rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--cor-texto);
   text-decoration: none;
+}
+
+.marca-logo {
+  flex: none;
+  width: 36px;
+  height: 36px;
+}
+
+.marca-texto {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.marca-nome {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.0625rem;
+  color: var(--cor-escola-azul);
+}
+
+.marca-escola {
+  font-size: 0.8125rem;
+  color: var(--cor-texto-suave);
 }
 
 .menu {
@@ -113,6 +141,13 @@ main.container {
   text-decoration: none;
   font-weight: 500;
   font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.menu-organizador {
+  padding: 4px 12px;
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: 999px;
 }
 
 .menu a:hover,
@@ -129,7 +164,7 @@ main.container {
 }
 
 .form-sair {
-  display: inline;
+  display: flex;
   margin: 0;
 }
 
@@ -139,13 +174,6 @@ main.container {
   background: none;
   font-family: inherit;
   cursor: pointer;
-}
-
-.rodape {
-  padding: 24px 0;
-  border-top: 1px solid var(--cor-borda);
-  color: var(--cor-texto-suave);
-  font-size: 0.875rem;
 }
 
 /* ---------- Cabeçalho de página ---------- */
@@ -303,7 +331,7 @@ button:focus-visible {
   text-decoration: none;
 }
 
-.card h2 {
+.card h3 {
   font-size: 1.125rem;
 }
 
@@ -325,6 +353,7 @@ button:focus-visible {
 
 .badge {
   display: inline-block;
+  white-space: nowrap;
   margin-top: auto;
   padding: 4px 12px;
   border-radius: 999px;
@@ -677,6 +706,7 @@ button:focus-visible {
 
 /* No celular a tabela rola dentro da caixa; a página nunca rola para o lado. */
 .tabela-rolagem {
+  position: relative; /* prende os elementos absolutos (ex.: rótulo "Ações" oculto) dentro da rolagem */
   overflow-x: auto;
   background: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
@@ -789,8 +819,12 @@ a.tabela-titulo:hover {
   position: absolute;
   width: 1px;
   height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
   overflow: hidden;
   clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -799,6 +833,438 @@ code {
   border-radius: 4px;
   background: var(--cor-neutro-fundo);
   font-size: 0.875em;
+}
+
+/* ---------- Acessibilidade: pular para o conteúdo ---------- */
+
+.pular-conteudo {
+  position: absolute;
+  left: 16px;
+  top: -48px;
+  z-index: 10;
+  padding: 8px 16px;
+  border-radius: var(--raio-campo);
+  background: var(--cor-escola-azul);
+  color: var(--cor-superficie);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pular-conteudo:focus {
+  top: 8px;
+}
+
+/* ---------- Breadcrumbs ---------- */
+
+.trilha {
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+}
+
+.trilha ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--cor-texto-suave);
+}
+
+.trilha li + li::before {
+  content: '›';
+  margin-right: 4px;
+  color: var(--cor-texto-suave);
+}
+
+.trilha a {
+  text-decoration: none;
+}
+
+.trilha a:hover {
+  text-decoration: underline;
+}
+
+.trilha [aria-current="page"] {
+  color: var(--cor-texto);
+  font-weight: 500;
+}
+
+/* ---------- Destaque da home (primeira seção, com a chamada principal) ---------- */
+
+.destaque {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 32px 24px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.destaque-rotulo {
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cor-primaria);
+}
+
+.destaque h1 {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  color: var(--cor-escola-azul);
+}
+
+.destaque-descricao {
+  max-width: 560px;
+  margin: 12px 0 24px;
+  font-size: 1.0625rem;
+  color: var(--cor-texto-suave);
+}
+
+.destaque-logo {
+  flex: none;
+  width: 176px;
+  height: 176px;
+}
+
+@media (max-width: 640px) {
+  .destaque {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 24px 20px;
+  }
+
+  .destaque-logo {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+.secao-eventos {
+  margin-top: 40px;
+  scroll-margin-top: 16px;
+}
+
+.secao-eventos .cabecalho-com-acao {
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.secao-eventos .filtro {
+  margin-bottom: 0;
+}
+
+.titulo-secao-grande {
+  font-size: 1.5rem;
+}
+
+/* ---------- Páginas de erro (404 e 500) ---------- */
+
+.pagina-erro {
+  max-width: 560px;
+  margin: 24px auto 0;
+  text-align: center;
+}
+
+.pagina-erro-codigo {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 4.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--cor-escola-turquesa-escuro);
+}
+
+.pagina-erro h1 {
+  margin-top: 8px;
+  font-size: 1.75rem;
+}
+
+.pagina-erro .acoes {
+  margin: 24px 0 16px;
+}
+
+.acoes-centro {
+  justify-content: center;
+}
+
+/* ---------- Agradecimento ---------- */
+
+.proximos-passos {
+  margin: 0 0 24px;
+  padding-left: 20px;
+  text-align: left;
+}
+
+.proximos-passos li + li {
+  margin-top: 6px;
+}
+
+.confirmacao .titulo-secao {
+  text-align: left;
+}
+
+/* ---------- Contato ---------- */
+
+@media (min-width: 900px) {
+  .duas-colunas-contato {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+}
+
+.caixa-lateral {
+  padding: 24px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.caixa-lateral p {
+  margin: 0 0 8px;
+}
+
+.caixa-lateral .titulo-secao + p {
+  margin-top: 0;
+}
+
+.caixa-lateral .titulo-secao:not(:first-child) {
+  margin-top: 24px;
+}
+
+.contador-caracteres {
+  margin: 0;
+  font-size: 0.8125rem;
+  text-align: right;
+  color: var(--cor-texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.contador-caracteres.perto-do-limite {
+  color: var(--cor-alerta-texto);
+  font-weight: 600;
+}
+
+/* ---------- Perguntas frequentes ---------- */
+
+.perguntas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pergunta {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.pergunta summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.pergunta summary::-webkit-details-marker {
+  display: none;
+}
+
+.pergunta summary::after {
+  content: '+';
+  flex: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--cor-primaria);
+}
+
+.pergunta[open] summary::after {
+  content: '−';
+}
+
+.pergunta p {
+  margin: 0;
+  padding: 0 20px 16px;
+  color: var(--cor-texto-suave);
+}
+
+.caixa-chamada {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: var(--cor-destaque-fundo);
+  border-radius: var(--raio);
+}
+
+.caixa-chamada p {
+  margin: 0;
+}
+
+/* ---------- Texto longo (política de privacidade) ---------- */
+
+.texto-longo h2 {
+  margin: 32px 0 8px;
+  font-size: 1.25rem;
+}
+
+.texto-longo p,
+.texto-longo ul {
+  margin: 0 0 12px;
+}
+
+.texto-longo li + li {
+  margin-top: 4px;
+}
+
+/* ---------- Mensagens (painel) ---------- */
+
+.lista-mensagens {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mensagem {
+  padding: 20px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-left: 4px solid var(--cor-primaria);
+  border-radius: var(--raio);
+  scroll-margin-top: 96px;
+}
+
+.mensagem-lida {
+  border-left-color: var(--cor-borda);
+}
+
+.mensagem-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mensagem-cabecalho .badge {
+  margin-right: 8px;
+}
+
+.mensagem .info {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+}
+
+.mensagem-texto {
+  margin: 12px 0 16px;
+  white-space: pre-line;
+}
+
+.contador-menu {
+  display: inline-block;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--cor-alerta-forte);
+  color: var(--cor-superficie);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* ---------- Rodapé ---------- */
+
+.rodape {
+  padding: 40px 0 24px;
+  background: var(--cor-superficie);
+  border-top: 1px solid var(--cor-borda);
+  color: var(--cor-texto-suave);
+  font-size: 0.9375rem;
+}
+
+.rodape-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px 32px;
+}
+
+.rodape-marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rodape-marca img {
+  flex: none;
+}
+
+.rodape-marca p {
+  margin: 0;
+}
+
+.rodape-marca strong {
+  color: var(--cor-texto);
+}
+
+.rodape-titulo {
+  margin: 0 0 8px;
+  font-family: var(--fonte-texto);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cor-texto-suave);
+}
+
+.rodape-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rodape-links a {
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.rodape-links a:hover {
+  color: var(--cor-primaria);
+  text-decoration: underline;
+}
+
+.rodape-final {
+  margin: 32px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--cor-borda);
+  font-size: 0.8125rem;
+}
+
+/* Celular: menu mais compacto, para os 4 itens públicos caberem numa linha. */
+@media (max-width: 420px) {
+  .menu {
+    gap: 4px 14px;
+  }
+
+  .menu-organizador {
+    padding: 2px 10px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
