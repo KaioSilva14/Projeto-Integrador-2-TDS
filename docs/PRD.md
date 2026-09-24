@@ -127,6 +127,22 @@ Como aluno, quero ver claramente que minha inscrição deu certo.
 - [x] Um botão por inscrito alterna presença (presente ↔ ausente).
 - [x] Após clicar, a lista volta **na mesma posição** (âncora `#inscricao-ID`), para fazer a chamada sem perder o lugar.
 
+### Páginas de apoio
+
+**HU15 — Falar com a coordenação**
+- [x] `/contato` com nome, e-mail, assunto e mensagem (até 1000 caracteres, com contador).
+- [x] Erros mostram o que corrigir e mantêm o que foi digitado.
+- [x] Depois de enviar, página de agradecimento; a mensagem aparece em `/admin/mensagens`.
+
+**HU16 — Tirar dúvidas sozinho**
+- [x] `/perguntas-frequentes` com 5 perguntas (conta, confirmação, esgotado, cancelamento, privacidade).
+
+**HU17 — Saber o que é feito com meus dados**
+- [x] `/privacidade` explica, em linguagem simples, dados coletados, uso, quem vê, cookies e como pedir exclusão (LGPD).
+
+**HU18 — Cancelar inscrição**
+- [x] O aluno pede pelo contato; o organizador remove a inscrição na lista de inscritos e a vaga volta a ficar disponível.
+
 ### Sistema
 
 **HU14 — API JSON**
@@ -147,6 +163,8 @@ Como aluno, quero ver claramente que minha inscrição deu certo.
 | RNF05 | Coleta o mínimo de dados pessoais (nome, e-mail, turma). Dados de alunos só aparecem para o organizador logado (LGPD — são menores de idade). |
 | RNF06 | Contraste de texto AA (4.5:1) e navegação por teclado — ver [DESIGN.md](DESIGN.md). |
 | RNF07 | Senhas nunca em texto puro; segredos só no `.env`. |
+| RNF08 | **Dados persistentes em produção:** banco no Turso (não no disco da Vercel), backup com `npm run backup`. |
+| RNF09 | Pronto para busca e redes sociais: meta description, `sitemap.xml`, `robots.txt`, imagem de compartilhamento, dados estruturados. |
 
 ---
 

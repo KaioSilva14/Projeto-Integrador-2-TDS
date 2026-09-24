@@ -19,6 +19,9 @@ colors:
   texto-suave: "#64748B"
   borda: "#E2E8F0"
   borda-campo: "#8391A5"
+  escola-turquesa: "#3BD7C9"
+  escola-turquesa-escuro: "#0F8F85"
+  escola-azul: "#1E1459"
   destaque-fundo: "#EFF6FF"
 typography:
   titulo-pagina:
@@ -128,6 +131,10 @@ Duas situações de uso definem as prioridades:
 
 ## Colors
 
+**Cores da escola (logo):** turquesa `#3BD7C9` e azul-marinho `#1E1459`, medidas direto na imagem do logo. O azul-marinho é usado no nome do site, no título da home e no `theme-color`; o turquesa só no logo e em detalhes decorativos (contraste baixo para texto). `escola-turquesa-escuro` (3.8:1) só em texto **grande**, como o "404".
+
+**Logo:** redesenhado em vetor (`public/img/logo-gori.svg`) a partir da imagem original — nítido em qualquer tamanho. O ícone (`favicon.svg`, ícones PNG) usa só o "G" em espiral, que continua reconhecível em 16 px.
+
 A paleta da identidade (CLAUDE.md, seção 9) foi mantida e completada com os tons que faltavam para **texto legível**. Contraste medido (WCAG):
 
 | Combinação | Contraste | Uso |
@@ -215,6 +222,13 @@ Cada componente é uma classe no `style.css`. Todos já existem.
 | Tabela | `.tabela-rolagem` > `.tabela` | Rola dentro da caixa no celular; `span.info` = 2ª linha da célula; `.numero-coluna` à direita |
 | Botão de presença | `.botao-presenca` (+ `.presente`) | Ausente: contornado. Presente: `sucesso-fundo` + "✓ Presente". Fica na **2ª coluna**, logo após o nome, para caber no celular |
 | Detalhes do evento | `.detalhe-dados` (`dl`) | 2 colunas no celular, 4 no PC |
+| Destaque da home | `.destaque` | Primeira seção: título, descrição e a chamada principal ("Ver próximos eventos") |
+| Breadcrumbs | `.trilha` (via `trilha` no include do header) | Em páginas internas; o último item é a página atual |
+| Perguntas | `.pergunta` (`details`/`summary`) | Abre e fecha sem JavaScript |
+| Páginas de erro | `.pagina-erro` | Código grande + o que aconteceu + caminhos para seguir |
+| Mensagem (painel) | `.mensagem` (+ `.mensagem-lida`) | Borda azul à esquerda quando não lida |
+| Contador de caracteres | `data-contador` + `maxlength` | Criado pelo `site.js`; fica vermelho perto do limite |
+| Rodapé | `.rodape-grade` | Logo, links internos e acesso da coordenação |
 
 ### Estados obrigatórios
 

@@ -12,9 +12,11 @@
 
 - **MVP completo e testado**: fluxo público (home, detalhes, inscrição, confirmação), login, painel, CRUD de eventos e categorias, inscritos com check-in, API JSON.
 - Teste de ponta a ponta: 60 verificações cobrindo todas as HUs e RNs, todas passando. Telas conferidas em 360 px e 1280 px.
-- Banco de desenvolvimento com os dados de demonstração (`npm run seed:demo`).
+- **Pronto para a Vercel**: banco Turso (libsql), sessão em cookie, `vercel.json`. Falta só criar o Turso e importar na Vercel (TASKS.md, "Publicação").
+- Os 18 itens de qualidade para publicação feitos (contato, perguntas, privacidade, SEO, favicon, logo…).
+- Banco de desenvolvimento com os dados de demonstração (`npm run seed:demo`) e as suas alterações.
 - GitHub: https://github.com/KaioSilva14/Projeto-Integrador-2-TDS
-- Próximo passo: estudar o código ([TASKS.md](TASKS.md), "Estudo do código") e entregar as etapas ao professor.
+- Próximo passo: publicar ([TASKS.md](TASKS.md), "Publicação"), estudar o código e entregar as etapas ao professor.
 
 ---
 
@@ -40,6 +42,12 @@ A tabela completa com alternativas está em [ARCHITECTURE.md §8](ARCHITECTURE.m
 | 24/09 | Botão "Excluir" contornado, não vermelho cheio | Vermelho repetido em cada linha dominava a tela |
 | 24/09 | Coluna "Presença" logo após o nome na lista de inscritos | No celular o botão ficava fora da tela |
 | 24/09 | Borda dos campos `#8391A5` | `#E2E8F0` tinha contraste 1.2:1 (mínimo para contorno de campo: 3:1) |
+| 24/09 | **Banco: `better-sqlite3` → `@libsql/client` (Turso na Vercel)** | O disco da Vercel é apagado a cada deploy: SQLite em arquivo perderia os dados |
+| 24/09 | **Sessão: `express-session` → `cookie-session`** | Na Vercel não há memória compartilhada entre requisições |
+| 24/09 | Excluir evento apaga inscrições explicitamente (transação) | Não depender do `PRAGMA foreign_keys` no Turso |
+| 24/09 | Logo redesenhado em SVG a partir da imagem da escola | A imagem original era pequena e borrada; vetor fica nítido em qualquer tamanho |
+| 24/09 | Contato grava no banco (tabela `mensagens`), sem e-mail automático | Notificação por e-mail está fora do escopo (CLAUDE.md §3.3) |
+| 24/09 | Organizador pode remover inscrição | Sem isso a resposta "como cancelo?" das perguntas frequentes não teria como ser cumprida |
 
 ---
 
@@ -50,8 +58,16 @@ Se algo "estranho" acontecer, procurar aqui primeiro.
 **`EADDRINUSE: address already in use :::3000`**
 Outro programa já usa a porta. Este projeto usa a 3333 (`PORT` no `.env`). O `server.js` mostra uma mensagem clara em vez do erro gigante.
 
-**`better-sqlite3` não carrega / "Could not locate the bindings file"**
-O npm 11 bloqueia scripts de instalação por padrão, e o `better-sqlite3` precisa do dele. Solução: `npm approve-scripts better-sqlite3` (fica registrado em `allowScripts` no `package.json`). Ao atualizar a versão do pacote, aprovar de novo.
+**Site na Vercel mostra erro 500 em todas as páginas**
+Quase sempre é variável de ambiente faltando. Nos logs da Vercel aparece a mensagem exata: `TURSO_DATABASE_URL não configurada` ou `Defina SESSION_SECRET`. Configure em *Settings → Environment Variables* e faça *Redeploy*.
+
+**Erro de rota `async` deixava a página carregando para sempre**
+O Express 4 não percebe erros dentro de funções `async`. Toda rota com `await` é envolvida por `assincrona(...)` (`src/middlewares/assincrona.js`), que manda o erro para a página 500.
+
+**Página inteira rolando para o lado no celular (tabelas do painel)**
+Um rótulo invisível ("Ações") com `position: absolute` escapava da caixa de rolagem da tabela. Resolvido com `position: relative` no `.tabela-rolagem`.
+
+*(Histórico: até 24/09 o projeto usava `better-sqlite3`, que exigia `npm approve-scripts` no npm 11. Não é mais usado.)*
 
 **`dotenv` imprimindo "injected env (N) from .env" toda hora**
 O dotenv 17+ faz isso por padrão. Usamos `require('dotenv').config({ quiet: true })`.
@@ -83,6 +99,9 @@ Só a pasta de testes do repositório tem caminhos longos demais para o Windows.
 
 - [ ] **Quantos integrantes?** O CLAUDE.md diz "4 integrantes no papel", mas a ficha lista 3 nomes (Heitor Eckel, Kaio Silva, Samuel Donato). Falta um nome ou o número está errado?
 - [x] **URL do GitHub** — https://github.com/KaioSilva14/Projeto-Integrador-2-TDS
+- [ ] **Contato da escola** — e-mail, telefone e endereço oficiais para a página de contato (variáveis `CONTATO_*` no `.env`/Vercel). Não foram inventados.
+- [ ] **Política de privacidade** — o texto é um modelo em linguagem simples; a direção deve revisar antes de divulgar o site.
+- [ ] **Logo oficial** — o logo foi redesenhado a partir de uma imagem pequena; se a escola tiver o arquivo original em alta qualidade, substituir `public/img/logo-gori.svg`.
 
 ---
 
@@ -96,7 +115,7 @@ Só a pasta de testes do repositório tem caminhos longos demais para o Windows.
 3. Se não abrir, o Firewall do Windows está bloqueando o Node — permitir quando ele perguntar, ou liberar a porta 3333.
 
 **Teste de ponta a ponta**
-Existe um script (bash + curl) que confere as 60 verificações, mas ele ficou fora do projeto (depende do Git Bash). Tarefa aberta no TASKS.md: transformá-lo em `npm test` com o `node:test` que já vem no Node.
+Existe um script (bash + curl) que confere as 90 verificações, mas ele ficou fora do projeto (depende do Git Bash). Tarefa aberta no TASKS.md: transformá-lo em `npm test` com o `node:test` que já vem no Node.
 
 ---
 
@@ -123,3 +142,11 @@ Existe um script (bash + curl) que confere as 60 verificações, mas ele ficou f
 - Teste de ponta a ponta com o servidor real: 60/60. Prints no Edge headless em 360 px e 1280 px.
 - Corrigidos depois dos prints: células da tabela quebrando (`.tabela .info` com `display: block`), botão de presença fora da tela no celular, botões "Excluir" chamativos demais, dados do evento empilhados no celular.
 - Docs atualizados (ARCHITECTURE, RULES, DESIGN, TASKS, PRD, README, CLAUDE.md).
+- **Preparação para a Vercel**: banco migrado para `@libsql/client` (arquivo local ou Turso), consultas `async` com `assincrona(...)`, sessão em `cookie-session`, `vercel.json`, app exportado. Simulado: sem Turso/sem segredo o app para com erro claro; o app exportado responde.
+- Scripts `npm run backup` e `npm run copiar-banco` criados e testados (cópia, recusa, restauração de backup).
+- **18 itens de qualidade**: destaque com CTA na home, contato (tabela `mensagens` + caixa no painel), 5 perguntas frequentes, privacidade, agradecimentos, breadcrumbs, meta description, Open Graph, dados estruturados (Event, FAQPage, BreadcrumbList), `robots.txt`, `sitemap.xml`, 404/500 novas, contador de caracteres, lazy loading.
+- **Logo** redesenhado em SVG com as cores medidas na imagem (turquesa `#3BD7C9`, azul `#1E1459`); favicon, ícones de app e imagem para redes sociais gerados a partir dele.
+- Corrigidos: selo "110 vagas" quebrando linha, botão "Sair" desalinhado, tabelas rolando a página no celular, tabela de inscritos larga demais.
+- Testes finais: 90/90 verificações; revisão visual automática em 17 páginas × 3 larguras sem problemas.
+- README novo com banner animado, GIF do fluxo, prints e passo a passo de publicação.
+- Incidente: um comando de revisão que você recusou chegou a copiar o `eventos.db` para `data/revisao.db`; a cópia foi apagada e o original não foi alterado.

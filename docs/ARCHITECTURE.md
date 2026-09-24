@@ -7,7 +7,10 @@
 
 ## 1. Visão geral
 
-Um único processo Node.js. O servidor monta o HTML (EJS) e devolve pronto para o navegador — não existe front-end separado.
+Um único app Node.js. O servidor monta o HTML (EJS) e devolve pronto para o navegador — não existe front-end separado.
+
+- **No computador:** `npm run dev` abre a porta 3333; o banco é o arquivo `data/eventos.db`.
+- **Na Vercel:** o `server.js` exporta o `app`, que vira uma função; a pasta `public/` é servida pela CDN; o banco é o **Turso** (SQLite na nuvem), porque o disco da Vercel é apagado a cada deploy.
 
 ```
  Navegador (aluno no celular / organizador no PC)
@@ -22,10 +25,11 @@ Um único processo Node.js. O servidor monta o HTML (EJS) e devolve pronto para 
  │        ▼                     ▼                 ▼                    ▼          │
  │   ──────────────────── repositories/*Repo.js (todo SQL mora aqui) ──────────── │
  │                                    │                                           │
- │                                 src/db.js  (uma conexão, PRAGMA foreign_keys)  │
+ │                    src/db.js  (libsql: consultar · obter · executar · transacao) │
  └────────────────────────────────────┼───────────────────────────────────────────┘
-                                      ▼
-                            data/eventos.db (SQLite)
+                          ┌───────────┴────────────┐
+                          ▼                        ▼
+              data/eventos.db (local)      Turso (produção, Vercel)
 ```
 
 ## 2. Camadas: quem pode fazer o quê
@@ -34,10 +38,11 @@ Um único processo Node.js. O servidor monta o HTML (EJS) e devolve pronto para 
 |---|---|---|---|
 | Entrada | `src/server.js` | Configura Express, sessão, estáticos; registra rotas; 404/500 | Regra de negócio, SQL |
 | Rotas | `src/routes/*.js` | Lê `req`, valida entrada, aplica as regras (RN), chama repositories, escolhe a view ou redireciona | **SQL** (nunca importa `db.js`) |
-| Middlewares | `src/middlewares/requireAuth.js`, `carregarEvento.js` | Barrar quem não está logado; buscar o evento do `:id` (ou 404) | Qualquer outra coisa |
+| Middlewares | `src/middlewares/requireAuth.js`, `carregarEvento.js`, `assincrona.js` | Barrar quem não está logado; buscar o evento do `:id` (ou 404) | Qualquer outra coisa |
 | Validação | `src/validacoes.js` | Limpar e validar dados de formulário (RULES.md §2); `lerId`, `hojeLocal` | Consultar o banco |
 | Repositories | `src/repositories/*Repo.js` | Todo o SQL, sempre com `?` (parâmetros) | Ler `req`/`res`, renderizar |
-| Banco | `src/db.js`, `src/schema.sql` | Abre conexão, liga FKs, cria tabelas | Consultas de negócio |
+| Banco | `src/db.js`, `src/schema.sql` | Escolhe arquivo local ou Turso, cria tabelas, oferece `consultar`/`obter`/`executar`/`transacao` (todas `async`) | Consultas de negócio |
+| Rotas `async` | `src/middlewares/assincrona.js` | Envolve toda rota que usa `await`: erro vai para a página 500 em vez de deixar a requisição sem resposta | — |
 | Views | `views/**/*.ejs` | Mostrar dados já prontos | Consultar banco, calcular regra |
 | Estilo | `public/css/style.css` | Visual (ver [DESIGN.md](DESIGN.md)) | — |
 
@@ -152,6 +157,17 @@ Status: ✅ pronto · ⬜ a fazer.
 | ✅ | `POST /eventos/:id/inscrever` | `inscricoesRepo.inscrever(eventoId, dados)` | redirect ou `public/inscrever` |
 | ✅ | `GET /eventos/:id/confirmacao` | — (lê a sessão) | `public/confirmacao` |
 
+### Páginas e SEO — `routes/paginas.js`, `routes/seo.js`
+| | Rota | Repository | View |
+|---|---|---|---|
+| ✅ | `GET /contato` | — | `public/contato` |
+| ✅ | `POST /contato` | `mensagensRepo.criar(dados)` | redirect ou `public/contato` |
+| ✅ | `GET /contato/obrigado` | — (lê a sessão) | `public/contato-obrigado` |
+| ✅ | `GET /perguntas-frequentes` | — | `public/perguntas` |
+| ✅ | `GET /privacidade` | — | `public/privacidade` |
+| ✅ | `GET /robots.txt` | — | texto |
+| ✅ | `GET /sitemap.xml` | `eventosRepo.listarAbertos()` | XML |
+
 ### Autenticação — `routes/auth.js`
 | | Rota | Repository | View |
 |---|---|---|---|
@@ -171,6 +187,10 @@ Status: ✅ pronto · ⬜ a fazer.
 | ✅ | `POST /admin/eventos/:id/excluir` | `eventosRepo.excluir(id)` | redirect |
 | ✅ | `GET /admin/eventos/:id/inscritos` | `inscricoesRepo.listarPorEvento(id)` | `admin/inscritos` |
 | ✅ | `POST /admin/inscricoes/:id/presenca` | `inscricoesRepo.alternarPresenca(id)` | redirect `…/inscritos#inscricao-ID` |
+| ✅ | `POST /admin/inscricoes/:id/excluir` | `inscricoesRepo.excluir(id)` | redirect `…/inscritos` |
+| ✅ | `GET /admin/mensagens` | `mensagensRepo.listar()` | `admin/mensagens` |
+| ✅ | `POST /admin/mensagens/:id/lida` | `mensagensRepo.alternarLida(id)` | redirect |
+| ✅ | `POST /admin/mensagens/:id/excluir` | `mensagensRepo.excluir(id)` | redirect |
 | ✅ | `GET /admin/categorias` | `categoriasRepo.listarComTotal()` | `admin/categorias` |
 | ✅ | `POST /admin/categorias` | `categoriasRepo.buscarPorNome(nome)`, `categoriasRepo.criar(nome)` | redirect ou `admin/categorias` |
 | ✅ | `POST /admin/categorias/:id/excluir` | `categoriasRepo.buscarPorId(id)`, `contarEventos(id)`, `excluir(id)` | redirect |
@@ -184,21 +204,24 @@ Status: ✅ pronto · ⬜ a fazer.
 
 Ao criar ou renomear uma função de repository, atualizar esta tabela.
 
-O teste de ponta a ponta usado em 24/09 cobriu todas as linhas acima (60 verificações, todas passando) — ver [MEMORY.md](MEMORY.md).
+O teste de ponta a ponta usado em 24/09 cobriu todas as linhas acima (90 verificações, todas passando) — ver [MEMORY.md](MEMORY.md).
 
 ---
 
 ## 6. Sessão
 
-Guardada em memória pelo `express-session` (some quando o servidor reinicia — aceitável para o projeto). Cookie `httpOnly` e `sameSite: 'lax'`.
+Guardada num **cookie assinado** pelo `cookie-session` (nome `sessao`, assinatura em `sessao.sig`). Não fica na memória do servidor porque, na Vercel, cada requisição pode cair numa instância diferente. Cookie `httpOnly`, `sameSite: 'lax'`, `secure` em produção, validade de 8 h.
+
+O conteúdo do cookie é **assinado, não criptografado**: o dono do navegador consegue ler, mas não alterar. Por isso ele só guarda dados do próprio usuário (o nome e o e-mail que ele mesmo digitou, ou o id do organizador).
 
 | Chave | Conteúdo | Quem grava | Quem lê/apaga |
 |---|---|---|---|
 | `req.session.usuario` | `{ id, nome }` do organizador | `POST /admin/login` | `requireAuth`, header (via `res.locals.usuario`); apagada no logout |
 | `req.session.ultimaInscricao` | `{ eventoId, nome, email }` (os dados do evento vêm do banco) | `POST /eventos/:id/inscrever` | `GET /eventos/:id/confirmacao` (apaga depois de mostrar) |
+| `req.session.contatoEnviado` | primeiro nome de quem enviou o contato | `POST /contato` | `GET /contato/obrigado` (apaga depois de mostrar) |
 | `req.session.aviso` | `{ tipo: 'sucesso' \| 'erro', texto }` | `avisar(req, tipo, texto)` nas rotas do admin | middleware do `server.js` passa para `res.locals.aviso` e apaga; o `header.ejs` mostra |
 
-O login usa `req.session.regenerate` (id de sessão novo a cada login) e o logout `req.session.destroy`.
+O login substitui a sessão inteira (`req.session = { usuario }`), descartando o que havia antes; o logout apaga o cookie (`req.session = null`).
 
 Nunca guardar senha nem hash na sessão.
 
@@ -224,7 +247,7 @@ Registro curto do porquê. Decisões novas vão aqui **e** no [MEMORY.md](MEMORY
 
 | # | Decisão | Por quê | Alternativa descartada |
 |---|---|---|---|
-| D01 | SQLite com `better-sqlite3` | Nada para instalar; API síncrona é mais fácil de ler e explicar | MySQL (exige servidor), `sqlite3` (callbacks) |
+| D01 | SQLite com `@libsql/client` (arquivo local ou Turso) | Nada para instalar localmente; o mesmo SQL roda na nuvem, onde a Vercel não guarda arquivos | `better-sqlite3` (usado até 24/09 — só funciona com arquivo local), MySQL/Postgres (exigem servidor e outro SQL) |
 | D02 | EJS renderizado no servidor | Um projeto, um processo, formulários HTML puros | API + React (dobra o trabalho) |
 | D03 | `bcryptjs` | Mesma API do `bcrypt` sem compilar no Windows | `bcrypt` (módulo nativo) |
 | D04 | Vagas ocupadas = `COUNT(*)`, não uma coluna | Nunca fica dessincronizado | Coluna `vagas_ocupadas` atualizada a cada inscrição |
@@ -234,7 +257,11 @@ Registro curto do porquê. Decisões novas vão aqui **e** no [MEMORY.md](MEMORY
 | D08 | `/api/eventos/:id/inscritos` exige login | Dados pessoais de menores (LGPD) | Rota pública |
 | D09 | Porta padrão 3333 | A 3000 está ocupada por outro projeto na máquina | 3000 |
 | D10 | Sem biblioteca de CSRF; cookie `sameSite: 'lax'` | O `lax` já impede outro site de enviar POST com a sessão; menos uma dependência | `csurf` (descontinuado) |
-| D11 | Sessão em memória | Um único servidor, sem produção real | Store em SQLite |
+| D11 | Sessão em cookie assinado (`cookie-session`) | Na Vercel não existe "um servidor" com memória compartilhada | `express-session` em memória (usado até 24/09), store em banco |
 | D12 | Validação num módulo próprio (`validacoes.js`), sem biblioteca | Fácil de ler e explicar; mensagens exatas do RULES.md | `express-validator`, `joi` |
-| D13 | JavaScript no navegador só para `confirm()` ao excluir (`public/js/confirmar.js`) | Tudo funciona sem JS (RNF04) | Excluir sem pedir confirmação |
+| D13 | JavaScript no navegador só para `confirm()` ao excluir e contador de caracteres (`public/js/site.js`) | Tudo funciona sem JS (RNF04) | Excluir sem pedir confirmação |
 | D14 | Seed de demonstração separado (`npm run seed:demo`), só com banco vazio | Nunca mistura dados de teste com dados reais | Dados de teste dentro do `seed.js` |
+| D15 | Excluir evento apaga as inscrições explicitamente, numa transação | No Turso o `PRAGMA foreign_keys` não é garantido por conexão; não depender só do `CASCADE` | Só `ON DELETE CASCADE` |
+| D16 | `npm run backup` (JSON) + `npm run copiar-banco` (cópia/restauração em uma transação) | "Não podemos perder os dados": cópia fácil antes de cada apresentação e migração PC → Turso sem perder nada | Exportar manualmente pelo painel do Turso |
+| D17 | `robots.txt` e `sitemap.xml` gerados por rota, não arquivos em `public/` | Precisam do endereço real do site (`SITE_URL` ou o host da requisição) | Arquivos estáticos com URL fixa |
+| D18 | Na Vercel, sem `TURSO_DATABASE_URL` o app para com erro | Melhor não abrir do que gravar num disco temporário e perder inscrições | Cair para um arquivo em `/tmp` |

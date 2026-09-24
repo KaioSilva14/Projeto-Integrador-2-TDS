@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-label="Eventos Escolares — Colégio Estadual José Luiz Gori">
+  <style>
+    .fundo { fill: #1E1459; }
+    .titulo { font: 700 64px 'Segoe UI', Poppins, Helvetica, Arial, sans-serif; fill: #FFFFFF; }
+    .escola { font: 500 22px 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #3BD7C9; letter-spacing: .5px; }
+    .fixo { font: 500 28px 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #C7D2FE; }
+    .palavra { font: 700 28px 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #FFFFFF; opacity: 0;
+               animation: troca 12s infinite; transform-box: fill-box; }
+    .p0 { animation-delay: 0.00s; }
+    .p1 { animation-delay: 2.40s; }
+    .p2 { animation-delay: 4.80s; }
+    .p3 { animation-delay: 7.20s; }
+    .p4 { animation-delay: 9.60s; }
+    .p0 { opacity: 1; } /* sem animação (visualizadores estáticos), aparece a primeira palavra */
+    .logo { animation: surgir 1.2s ease-out; transform-origin: 170px 150px; }
+    .bolha { fill: #3BD7C9; opacity: .08; }
+    @keyframes troca {
+    0% { opacity: 0; transform: translateY(14px); }
+    2.40% { opacity: 1; transform: translateY(0); }
+    16.40% { opacity: 1; transform: translateY(0); }
+    19.00% { opacity: 0; transform: translateY(-14px); }
+    100% { opacity: 0; transform: translateY(-14px); }
+  }
+    @keyframes surgir { from { transform: scale(.85) rotate(-25deg); } to { transform: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      .palavra, .logo { animation: none; }
+      .p0 { opacity: 1; }
+    }
+  </style>
+  <rect class="fundo" width="1200" height="300" rx="24"/>
+  <circle class="bolha" cx="1130" cy="40" r="190"/>
+  <circle class="bolha" cx="1010" cy="300" r="120"/>
+  <g class="logo"><svg x="50" y="30" width="240" height="240" viewBox="0 0 424 424">
+  <circle cx="212" cy="212" r="212" fill="#3BD7C9"/>
+  <circle cx="111" cy="213" r="65" fill="#1E1459"/>
+  <path d="M155.16 192.41L154.70 188.78L153.93 185.12L152.86 181.45L151.48 177.81L149.78 174.22L147.77 170.70L145.45 167.28L142.83 163.98L139.73 161.16L135.93 159.54L132.04 158.19L128.08 157.13L124.08 156.34L120.05 155.85L116.02 155.63L112.00 155.70L108.02 156.05L104.08 156.68L100.23 157.57L96.46 158.73L92.80 160.14L89.27 161.80L85.88 163.69L82.64 165.80L79.58 168.13L76.70 170.64L74.02 173.34L71.55 176.21L69.30 179.23L67.27 182.38L65.48 185.65L63.94 189.02L62.64 192.47L61.59 195.99L60.79 199.55L60.25 203.14L59.96 206.73L59.93 210.32L60.15 213.89L60.61 217.41L61.32 220.87L62.26 224.25L63.44 227.54L64.83 230.72L66.43 233.78L68.23 236.71L70.23 239.48L72.40 242.09L74.73 244.53L77.22 246.78L79.84 248.84L82.59 250.71L85.44 252.36L88.38 253.80L91.40 255.03L94.48 256.03L97.61 256.81L100.76 257.37L103.92 257.70L107.08 257.80L110.22 257.69L113.32 257.35L116.38 256.80L119.37 256.05L122.28 255.09L125.09 253.93L127.81 252.59L130.40 251.07L132.86 249.39L135.19 247.54L137.36 245.55L139.38 243.43L141.23 241.19L142.90 238.83L144.40 236.38L145.70 233.85L146.83 231.25L147.75 228.60L148.49 225.91L149.03 223.19L149.37 220.46L149.52 217.73L149.47 215.02L149.24 212.33L148.82 209.69L148.22 207.10L147.45 204.59L146.50 202.15L145.40 199.80L144.14 197.55L142.73 195.41L141.19 193.39L139.53 191.50L137.75 189.75L135.86 188.14L133.58 187.03L131.26 186.12L128.93 185.40L126.60 184.87L124.28 184.52L122.00 184.35L119.76 184.36L117.57 184.54L115.45 184.87L113.42 185.36L111.47 185.99L109.62 186.75L107.88 187.63L106.26 188.62L104.76 189.70L103.38 190.87L102.14 192.12L101.02 193.42L100.05 194.77L99.21 196.16L98.51 197.58L97.94 199.00L98.25 199.33L99.36 198.62L100.50 198.01L101.68 197.48L102.87 197.05L104.08 196.71L105.31 196.46L106.53 196.31L107.74 196.24L108.95 196.27L110.13 196.38L111.29 196.57L112.41 196.85L113.50 197.21L114.55 197.64L115.54 198.14L116.49 198.71L117.37 199.34L118.20 200.02L118.96 200.75L119.65 201.52L120.27 202.34L120.82 203.18L121.65 203.74L122.46 204.37L123.22 205.06L123.95 205.82L124.62 206.65L125.25 207.53L125.81 208.47L126.32 209.46L126.75 210.50L127.12 211.59L127.41 212.71L127.62 213.87L127.74 215.06L127.78 216.26L127.74 217.48L127.60 218.72L127.37 219.95L127.05 221.18L126.64 222.40L126.13 223.60L125.53 224.77L124.85 225.91L124.07 227.01L123.20 228.07L122.25 229.07L121.22 230.01L120.12 230.89L118.93 231.69L117.69 232.42L116.37 233.06L115.01 233.61L113.59 234.07L112.12 234.42L110.62 234.68L109.09 234.83L107.54 234.87L105.97 234.80L104.39 234.61L102.82 234.31L101.25 233.90L99.71 233.37L98.19 232.72L96.71 231.97L95.27 231.10L93.88 230.12L92.56 229.03L91.30 227.84L90.12 226.56L89.03 225.18L88.02 223.71L87.12 222.17L86.32 220.55L85.63 218.86L85.05 217.11L84.60 215.31L84.28 213.47L84.08 211.59L84.02 209.69L84.09 207.77L84.30 205.84L84.64 203.92L85.13 202.02L85.75 200.14L86.52 198.29L87.41 196.49L88.45 194.74L89.61 193.05L90.89 191.44L92.30 189.91L93.83 188.48L95.46 187.14L97.20 185.92L99.03 184.81L100.95 183.82L102.95 182.97L105.02 182.26L107.16 181.69L109.34 181.27L111.56 181.00L113.81 180.89L116.08 180.94L118.35 181.15L120.62 181.52L122.88 182.05L125.11 182.75L127.29 183.61L130.03 183.70L133.05 183.74L136.16 184.06L139.33 184.67L142.54 185.58L145.75 186.81L148.95 188.36L152.10 190.22L155.16 192.41Z" fill="#12A89C"/>
+  <text x="197" y="187" font-family="Poppins, 'Segoe UI', Arial, sans-serif" font-weight="700" font-size="23" letter-spacing="0.5" textLength="100" lengthAdjust="spacingAndGlyphs" fill="#1E1459">COLÉGIO</text>
+  <g fill="#1E1459">
+    <path fill-rule="evenodd" d="M216 202.5a31 31 0 1 1 0 62a31 31 0 1 1 0-62ZM216 204a16.5 16.5 0 1 0 0 33a16.5 16.5 0 1 0 0-33Z"/>
+    <path d="M270 197L292 197A22 22 0 0 1 314 219L314 229L300 229L318 267L300 267L287 237L287 267L270 267Z"/>
+    <path d="M333 197L349 197L376 267L331 267Z"/>
+  </g>
+</svg></g>
+  <text class="escola" x="330" y="104">COLÉGIO ESTADUAL JOSÉ LUIZ GORI · MANDAGUARI/PR</text>
+  <text class="titulo" x="326" y="176">Eventos Escolares</text>
+  <text class="fixo" x="330" y="232">Inscrição em segundos para:</text>
+  <text class="palavra p0" x="700" y="232">Palestras</text>
+  <text class="palavra p1" x="700" y="232">Feiras</text>
+  <text class="palavra p2" x="700" y="232">Competições</text>
+  <text class="palavra p3" x="700" y="232">Reuniões de pais</text>
+  <text class="palavra p4" x="700" y="232">Semanas culturais</text>
+</svg>

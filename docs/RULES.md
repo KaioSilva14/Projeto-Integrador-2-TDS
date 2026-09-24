@@ -11,7 +11,7 @@ Os códigos são citados no código (`// RN01`) e no [PRD.md](PRD.md). As mensag
 
 ### RN01 — Vagas
 Uma inscrição só é aceita se `COUNT(inscricoes do evento) < capacidade`.
-- A contagem e o `INSERT` rodam na **mesma** `db.transaction(...)`.
+- A contagem e o `INSERT` rodam na **mesma** `db.transacao(...)` (em `src/db.js`).
 - Mensagem: **"As vagas deste evento esgotaram."**
 - Onde: `inscricoesRepo.inscrever`.
 - Teste: evento com capacidade 1 → primeira inscrição passa, a segunda recebe a mensagem.
@@ -32,7 +32,7 @@ Não aceita inscrição se `status = 'encerrado'` **ou** `data_evento < date('no
 - Teste: evento com data de ontem → sem botão; POST direto → recusado.
 
 ### RN04 — Excluir evento apaga as inscrições
-Garantido pelo banco (`ON DELETE CASCADE`). A tela avisa quantas inscrições serão apagadas antes de confirmar.
+`eventosRepo.excluir` apaga as inscrições e o evento **numa transação**; o `ON DELETE CASCADE` do banco é a segunda defesa. A tela avisa quantas inscrições serão apagadas antes de confirmar.
 - Teste: evento com 2 inscrições → excluir → `SELECT COUNT(*) FROM inscricoes WHERE evento_id = ?` dá 0.
 
 ### RN05 — Categoria em uso não pode ser excluída
@@ -58,6 +58,12 @@ A página de confirmação lê `req.session.ultimaInscricao` e apaga depois de m
 ### RN10 — Evento novo não pode ser no passado
 Ao **criar**, `data_evento` ≥ hoje. (Ao editar pode, para corrigir um evento antigo.)
 - Mensagem: **"A data do evento não pode estar no passado."**
+
+### RN11 — Cancelamento é feito pela coordenação
+O aluno pede pelo contato; o organizador remove a inscrição na lista de inscritos (`POST /admin/inscricoes/:id/excluir`), o que libera a vaga na hora.
+
+### RN12 — Mensagens de contato
+Validadas no servidor (seção 2). Um campo escondido (`site`) que só robôs preenchem faz o envio ser descartado em silêncio. Mensagens só aparecem para o organizador logado.
 
 ---
 
@@ -85,6 +91,14 @@ Remover espaços das pontas (`trim()`) de todo texto antes de validar. Campo que
 | capacidade | inteiro de 1 a 10000 (+ RN08) | "A capacidade deve ser um número maior que zero." |
 | status | `aberto` ou `encerrado` | — (valor fora disso vira `aberto`) |
 
+### Contato
+| Campo | Regra | Mensagem |
+|---|---|---|
+| nome | obrigatório, 3 a 100 caracteres | "Informe seu nome completo." |
+| email | formato válido, até 120 caracteres | "Informe um e-mail válido para podermos responder." |
+| assunto | um dos valores da lista (`ASSUNTOS` em `validacoes.js`) | "Escolha o assunto." |
+| mensagem | 10 a 1000 caracteres (contador no navegador) | "Escreva sua mensagem (pelo menos 10 caracteres)." / "A mensagem pode ter até 1000 caracteres." |
+
 ### Categoria
 | Campo | Regra | Mensagem |
 |---|---|---|
@@ -103,6 +117,9 @@ Remover espaços das pontas (`trim()`) de todo texto antes de validar. Campo que
 4. **Não logar dados sensíveis** — nada de `console.log(req.body)` no login.
 5. **Dados de alunos só para o organizador logado** (RN07). A API pública não devolve e-mail nem turma.
 6. **Mensagem de erro genérica para o usuário**; detalhe técnico só no console do servidor.
+7. **Toda rota com `await` passa por `assincrona(...)`** — sem isso, um erro no banco deixa a requisição sem resposta.
+8. **Páginas com dados pessoais ou de uso único não são indexadas** (`noindex`): painel, inscrição, agradecimentos.
+9. **Backups (`backups/`) contêm dados de alunos** — ficam fora do Git (`.gitignore`) e não devem ser enviados a ninguém.
 
 ---
 

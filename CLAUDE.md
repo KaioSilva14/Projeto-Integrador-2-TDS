@@ -93,12 +93,13 @@ Nas reuniões/apresentações em grupo, o discurso institucional pode continuar 
 | Runtime | Node.js (LTS) | Já instalado, você já usa no VS Code. |
 | Back-end | Express 4 | Mínimo boilerplate, muita documentação, fácil de debugar sozinho. |
 | Views | EJS (renderização no servidor) | Evita construir uma API separada + SPA. Um único projeto, um único processo, menos coisa para quebrar. Formulários HTML puro fazem o CRUD. |
-| Banco de dados | SQLite via `better-sqlite3` | Zero instalação de servidor de banco (nada de configurar MySQL/Postgres em outra máquina). API síncrona, sem `callback hell`, ótimo para quem está começando. O arquivo `.db` fica dentro do projeto. |
-| Autenticação | `bcryptjs` + `express-session` | Só existe **um** usuário organizador. Sessão simples, sem JWT, sem OAuth. `bcryptjs` é a versão em JavaScript puro do `bcrypt` (mesma API, mesmo algoritmo): não precisa compilar nada no Windows. |
+| Banco de dados | SQLite via `@libsql/client` | Zero instalação de servidor de banco. **No computador**, o banco é um arquivo `.db` dentro do projeto. **Na Vercel**, o mesmo código conecta no **Turso** (SQLite na nuvem): o disco da Vercel é apagado a cada deploy, então um arquivo ali perderia os dados. Mesmo SQL e mesmo `schema.sql` nos dois. As consultas usam `await` (o banco pode estar em outro servidor). |
+| Autenticação | `bcryptjs` + `cookie-session` | Só existe **um** usuário organizador. Sessão num **cookie assinado** (não na memória do servidor), porque na Vercel cada requisição pode cair numa instância diferente. `bcryptjs` é a versão em JavaScript puro do `bcrypt` (mesma API): não precisa compilar nada no Windows. |
 | Config | `dotenv` | Variáveis de ambiente (porta, segredo da sessão). |
 | Dev | `nodemon` | Reinício automático durante o desenvolvimento. |
 | Front-end estático | CSS puro (sem framework) | Ver seção 9 (identidade visual). Não usar Bootstrap/Tailwind para não gastar tempo aprendendo outra ferramenta agora. |
-| Controle de versão | Git + GitHub | Um repositório, commits pequenos e frequentes (ver seção 11). |
+| Controle de versão | Git + GitHub | Um repositório, commits pequenos e frequentes (ver seção 11). https://github.com/KaioSilva14/Projeto-Integrador-2-TDS |
+| Hospedagem | Vercel + Turso | Deploy automático a cada `git push`; dados no Turso. Passo a passo no `README.md`, seção "Colocar no ar". |
 
 **Por que não React/TypeScript aqui:** seus outros projetos pessoais (WeatherFlow, App de Evolução Pessoal) usam React Native/TypeScript porque são projetos de portfólio sem prazo apertado. Este é um projeto de disciplina com entrega fixa em 04/12 e você sozinho — a prioridade é **funcionar e estar bem documentado**, não usar a stack mais moderna.
 
@@ -244,7 +245,14 @@ CREATE TABLE IF NOT EXISTS inscricoes (
 | GET | `/eventos/:id` | Detalhes do evento + vagas restantes |
 | GET | `/eventos/:id/inscrever` | Formulário de inscrição |
 | POST | `/eventos/:id/inscrever` | Processa inscrição (valida vaga e duplicidade) |
-| GET | `/eventos/:id/confirmacao` | Página de confirmação pós-inscrição. Os dados da inscrição recém-feita vêm da **sessão** (`req.session.ultimaInscricao`), não da URL — assim ninguém troca um número no endereço e vê o nome/e-mail de outro aluno. |
+| GET | `/eventos/:id/confirmacao` | Página de agradecimento pós-inscrição. Os dados da inscrição recém-feita vêm da **sessão** (`req.session.ultimaInscricao`), não da URL — assim ninguém troca um número no endereço e vê o nome/e-mail de outro aluno. |
+
+| GET | `/contato` | Formulário de contato + dados da escola |
+| POST | `/contato` | Grava a mensagem (tabela `mensagens`); campo escondido barra robôs de spam |
+| GET | `/contato/obrigado` | Agradecimento do contato (só logo após enviar) |
+| GET | `/perguntas-frequentes` | 5 perguntas frequentes (com dados estruturados FAQPage) |
+| GET | `/privacidade` | Política de privacidade (LGPD) |
+| GET | `/robots.txt`, `/sitemap.xml` | Gerados pelo servidor (precisam do endereço real do site) |
 
 ### 6.2 Autenticação
 | Método | Rota | Ação |
@@ -268,6 +276,10 @@ CREATE TABLE IF NOT EXISTS inscricoes (
 | GET | `/admin/categorias` | Lista categorias |
 | POST | `/admin/categorias` | Cria categoria |
 | POST | `/admin/categorias/:id/excluir` | Exclui categoria (bloquear se houver evento vinculado) |
+| POST | `/admin/inscricoes/:id/excluir` | Remove uma inscrição (aluno pediu cancelamento) e libera a vaga |
+| GET | `/admin/mensagens` | Mensagens do contato (não lidas primeiro) |
+| POST | `/admin/mensagens/:id/lida` | Alterna lida/não lida |
+| POST | `/admin/mensagens/:id/excluir` | Exclui mensagem |
 
 ### 6.4 API JSON (somente leitura — demonstra a camada de API pedida no plano)
 | Método | Rota | Retorno |
@@ -280,10 +292,10 @@ CREATE TABLE IF NOT EXISTS inscricoes (
 
 ## 7. Regras de negócio (o que validar no código, não confiar no formulário)
 
-1. **Vagas:** antes de gravar uma inscrição, calcular `COUNT(*) FROM inscricoes WHERE evento_id = ?` e comparar com `capacidade`. Se `>=`, recusar com mensagem clara. A contagem e o `INSERT` rodam **dentro da mesma transação** (`db.transaction(...)` do `better-sqlite3`), para que duas inscrições simultâneas não ocupem a última vaga ao mesmo tempo.
+1. **Vagas:** antes de gravar uma inscrição, calcular `COUNT(*) FROM inscricoes WHERE evento_id = ?` e comparar com `capacidade`. Se `>=`, recusar com mensagem clara. A contagem e o `INSERT` rodam **dentro da mesma transação** (`db.transacao(...)`, em `src/db.js`), para que duas inscrições simultâneas não ocupem a última vaga ao mesmo tempo.
 2. **Duplicidade:** o e-mail é normalizado (`trim()` + minúsculas) antes de qualquer consulta. Verificar se já existe `inscricoes` com o mesmo `evento_id` + e-mail do participante (via join com `participantes`) antes de inserir; a constraint `UNIQUE` do banco é a segunda linha de defesa, não a primeira. Se o e-mail já existe em `participantes`, reaproveitar esse participante (ver seção 5.2).
 3. **Evento encerrado:** se `status = 'encerrado'` ou `data_evento` já passou, bloquear novas inscrições mesmo que existam vagas. Comparar com a data **local** (`date('now', 'localtime')` no SQLite): `date('now')` sozinho usa UTC e, depois das 21h no horário de Brasília, já "virou o dia".
-4. **Exclusão de evento:** ao excluir um evento, excluir também suas inscrições (ou usar `ON DELETE CASCADE` na FK — preferível).
+4. **Exclusão de evento:** ao excluir um evento, excluir também suas inscrições. O `eventosRepo.excluir` apaga as inscrições e o evento **numa transação**; o `ON DELETE CASCADE` fica como segunda defesa (no Turso, cada requisição pode abrir uma conexão nova e o `PRAGMA foreign_keys` não é garantido).
 5. **Exclusão de categoria:** só permitir excluir se nenhum evento estiver vinculado a ela.
 6. **Senha do organizador:** nunca armazenar em texto puro — sempre `bcrypt.hash` na criação/seed e `bcrypt.compare` no login.
 7. **Sessão:** todas as rotas `/admin/*` (exceto `/admin/login`) e a rota `/api/eventos/:id/inscritos` passam pelo middleware `requireAuth`, que redireciona para login se não houver sessão ativa.
@@ -338,45 +350,58 @@ Usar **um único arquivo** `public/css/style.css`, sem framework, para manter o 
 ```
 Projeto-Integrador-2-TDS/
 ├── CLAUDE.md
-├── README.md                     # instruções de instalação (espelho da seção 16)
+├── README.md                     # apresentação do projeto, instalação e publicação
+├── vercel.json                   # inclui views/ e schema.sql no pacote da Vercel; cabeçalhos de segurança
 ├── .env                          # segredos reais — NÃO versionar (está no .gitignore)
 ├── .env.example                  # modelo do .env, sem segredos — versionado
 ├── .gitignore
 ├── package.json
 ├── docs/                         # PRD, ARCHITECTURE, RULES, DESIGN, TASKS, MEMORY
+│   └── imagens/                  # prints e GIF do README
+├── backups/                      # gerado por `npm run backup` — NÃO versionar (dados de alunos)
 ├── data/
 │   └── eventos.db                # banco SQLite, criado automaticamente — NÃO versionar (está no .gitignore)
 ├── src/
-│   ├── server.js                 # ponto de entrada
-│   ├── db.js                     # conexão better-sqlite3 + execução do schema.sql
+│   ├── server.js                 # ponto de entrada; exporta o app (Vercel) e abre a porta só localmente
+│   ├── config.js                 # nome da escola, SITE_URL e contatos (do .env)
+│   ├── db.js                     # conexão libsql (arquivo local ou Turso) + schema.sql + transações
 │   ├── schema.sql                # DDL da seção 5.3
 │   ├── seed.js                   # cria categorias padrão + usuário organizador
 │   ├── seed-demo.js              # eventos e inscrições de exemplo (npm run seed:demo)
+│   ├── backup.js                 # npm run backup → backups/*.json
+│   ├── copiar-banco.js           # npm run copiar-banco → copia/restaura dados entre bancos
 │   ├── validacoes.js             # validação dos formulários (docs/RULES.md §2)
 │   ├── middlewares/
 │   │   ├── requireAuth.js
-│   │   └── carregarEvento.js     # busca o evento do :id ou responde 404
+│   │   ├── carregarEvento.js     # busca o evento do :id ou responde 404
+│   │   └── assincrona.js         # repassa erros de rotas async para o tratador 500
 │   ├── routes/
 │   │   ├── public.js              # home, detalhes, inscrição
 │   │   ├── admin.js                # dashboard, eventos, categorias, inscritos
 │   │   ├── auth.js                 # login/logout
+│   │   ├── paginas.js              # contato, perguntas frequentes, privacidade
+│   │   ├── seo.js                  # robots.txt e sitemap.xml
 │   │   └── api.js                  # rotas JSON
 │   └── repositories/
 │       ├── eventosRepo.js
 │       ├── categoriasRepo.js
 │       ├── participantesRepo.js
 │       ├── inscricoesRepo.js
+│       ├── mensagensRepo.js
 │       └── usuariosRepo.js
 ├── views/                         # EJS
 │   ├── partials/ (header, footer, badge-evento)
-│   ├── public/ (home, evento, inscrever, confirmacao, 404, erro)
-│   └── admin/ (login, dashboard, eventos-lista, evento-form, inscritos, categorias)
-└── public/
+│   ├── public/ (home, evento, inscrever, confirmacao, contato, contato-obrigado, perguntas, privacidade, 404, erro)
+│   └── admin/ (login, dashboard, eventos-lista, evento-form, inscritos, categorias, mensagens)
+└── public/                        # na Vercel, servido pela CDN
     ├── css/style.css
-    └── js/confirmar.js            # só o confirm() antes de excluir — tudo funciona sem JS
+    ├── js/site.js                 # confirm() ao excluir + contador de caracteres — tudo funciona sem JS
+    ├── img/                       # logo (SVG), ícones e imagem para redes sociais
+    ├── favicon.ico, favicon.svg
+    └── site.webmanifest
 ```
 
-**Convenção:** nenhuma rota fala direto com `better-sqlite3` — sempre passa por um `repository`. Isso deixa o código organizado e fácil de explicar linha a linha na banca.
+**Convenção:** nenhuma rota fala direto com o banco (`db.js`) — sempre passa por um `repository`. Isso deixa o código organizado e fácil de explicar linha a linha na banca.
 
 ---
 
@@ -459,16 +484,16 @@ O arquivo real é o `package.json` na raiz — não copiar a lista para cá (ela
 | Pacote | Versão | Para quê |
 |---|---|---|
 | `express` | 4.x | servidor e rotas |
-| `express-session` | 1.x | sessão do organizador |
+| `cookie-session` | 2.x | sessão num cookie assinado |
 | `ejs` | 6.x | views renderizadas no servidor |
-| `better-sqlite3` | 13.x | banco SQLite (a 11.x não tem binário pronto para o Node 24) |
+| `@libsql/client` | 0.x | banco SQLite: arquivo local ou Turso |
 | `bcryptjs` | 3.x | hash da senha (ver seção 4) |
 | `dotenv` | 18.x | lê o `.env` |
 | `nodemon` (dev) | 3.x | reinicia o servidor ao salvar |
 
-Scripts: `npm start` (produção), `npm run dev` (desenvolvimento), `npm run seed` (dados iniciais), `npm run seed:demo` (eventos e inscrições de exemplo — só roda com o banco sem eventos).
+Scripts: `npm start` (produção), `npm run dev` (desenvolvimento), `npm run seed` (dados iniciais), `npm run seed:demo` (eventos e inscrições de exemplo — só roda com o banco sem eventos), `npm run backup` (cópia de segurança em `backups/`), `npm run copiar-banco` (copia/restaura dados entre bancos, ex.: do PC para o Turso).
 
-> O npm 11 bloqueia scripts de instalação por padrão. O `better-sqlite3` precisa do dele (baixa o binário nativo), por isso o `package.json` tem `"allowScripts": { "better-sqlite3@13.0.3": true }`. Se atualizar a versão do pacote, rodar `npm approve-scripts better-sqlite3` de novo.
+Todos os scripts de banco usam o Turso quando `TURSO_DATABASE_URL` está definida no ambiente — é assim que se roda seed/backup em produção.
 
 ### 16.3 Variáveis de ambiente (`.env`)
 
@@ -477,14 +502,24 @@ Copiar de `.env.example` (que é versionado) e preencher. O `.env` real nunca va
 ```
 PORT=3333
 SESSION_SECRET=         # texto aleatório longo — gerar com o comando abaixo
-DB_PATH=./data/eventos.db
+DB_PATH=./data/eventos.db    # banco local; ignorado se TURSO_DATABASE_URL estiver preenchida
+
+TURSO_DATABASE_URL=          # produção (Vercel): libsql://...turso.io
+TURSO_AUTH_TOKEN=
+SITE_URL=                    # endereço público, ex.: https://eventos-gori.vercel.app
 
 ADMIN_NOME=Coordenação
 ADMIN_EMAIL=organizador@escola.com
 ADMIN_SENHA=            # senha do organizador, usada só pelo seed
+
+CONTATO_EMAIL=          # opcionais: aparecem na página de contato
+CONTATO_TELEFONE=
+ESCOLA_ENDERECO=
 ```
 
 Gerar um `SESSION_SECRET`: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+
+Na Vercel, sem `TURSO_DATABASE_URL` ou sem `SESSION_SECRET` o site **para com erro claro** em vez de rodar sem banco persistente.
 
 A porta padrão é **3333** porque a 3000 costuma estar ocupada por outros projetos na máquina. Se a porta estiver em uso, o servidor avisa e para.
 
@@ -521,4 +556,8 @@ node_modules/
 .env
 data/*.db
 data/*.db-*
+backups/
 ```
+
+### 16.8 Colocar no ar
+Passo a passo completo (Turso + Vercel + copiar os dados do computador) no `README.md`, seção **"Colocar no ar (Vercel + Turso)"**. Resumo: criar o banco Turso, importar o repositório na Vercel, configurar `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `SESSION_SECRET` e `SITE_URL`, rodar `npm run copiar-banco` uma vez e fazer o deploy.

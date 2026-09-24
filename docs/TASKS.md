@@ -7,9 +7,27 @@
 
 **Situação em 24/09/2026:** o MVP inteiro (seção 3.1 do CLAUDE.md) está implementado e testado — bem antes do previsto. O que falta agora é **entregar cada etapa ao professor no prazo dele**, **entender cada arquivo** (você vai ter que explicar na banca) e **polir** para o pitch.
 
-**Próxima tarefa:** ler o código na ordem sugerida em "Estudo do código" abaixo.
+**Próxima tarefa:** colocar o site no ar (seção "Publicação" abaixo) e, em paralelo, estudar o código na ordem de "Estudo do código".
 
 ---
+
+## Publicação (Vercel + Turso) — passo a passo no README, "Colocar no ar"
+- [x] 🔸 Código pronto para a Vercel: banco Turso via `@libsql/client`, sessão em cookie, `vercel.json`, app exportado
+- [x] 🔸 `npm run backup` e `npm run copiar-banco` (testados: cópia, recusa sem `--substituir`, restauração)
+- [ ] Criar o banco no Turso (Vercel → Storage → Turso)
+- [ ] Importar o repositório na Vercel e configurar `SESSION_SECRET` (novo!) e `SITE_URL`
+- [ ] `npm run copiar-banco` do `data/eventos.db` para o Turso
+- [ ] Abrir o site publicado e testar: inscrição, login, check-in, contato
+- [ ] `npm run backup` apontando para o Turso, e guardar o arquivo
+- [ ] Preencher `CONTATO_EMAIL` / `CONTATO_TELEFONE` / `ESCOLA_ENDERECO` (opcional)
+
+## Qualidade para publicação (lista de 18 itens) — feito em 24/09
+- [x] CTA na 1ª seção · mensagens de erro úteis · página de contato · 5 perguntas frequentes
+- [x] Imagens otimizadas · links internos · meta description · texto alternativo
+- [x] `sitemap.xml` · política de privacidade · páginas de agradecimento · limite de caracteres
+- [x] Lazy loading · 404 personalizada · breadcrumbs · `robots.txt` · imagem para redes sociais · favicon
+- [ ] Direção da escola revisar o texto da política de privacidade
+- [ ] Trocar o logo redesenhado pelo arquivo oficial, se a escola tiver um em alta qualidade
 
 ## Semana 29/09–02/10 — Ficha do projeto
 - [x] Problema, público e proposta de valor (CLAUDE.md §2, PRD.md §1–3)
@@ -68,12 +86,13 @@ As telas já existem de verdade. Duas opções para a entrega:
 - [x] 🔸 API JSON: `/api/eventos`, `/api/eventos/:id`, `/api/eventos/:id/inscritos` (com login) — HU14
 - [x] 🔸 Todas as HUs do PRD.md conferidas (teste de ponta a ponta: 60 verificações)
 - [x] 🔸 Checklist de segurança (RULES.md §3): SQL parametrizado, HTML escapado, sessão regenerada no login
-- [ ] Transformar o teste de ponta a ponta em `npm test` (hoje ele é um script fora do projeto — ver MEMORY.md)
+- [ ] Transformar o teste de ponta a ponta em `npm test` (hoje ele é um script fora do projeto, com 90 verificações — ver MEMORY.md)
 
 ## Semana 24–27/11 — Versão candidata
-- [ ] Revisão visual de todas as telas contra o DESIGN.md (`/impeccable audit` ajuda aqui)
-- [ ] Prints das telas para a documentação
-- [ ] README e CLAUDE.md refletindo o estado real do código
+- [x] 🔸 Revisão visual automática: 17 páginas × 3 larguras (375, 768, 1280), sem problemas
+- [x] 🔸 Prints das telas e GIF de demonstração no README
+- [x] 🔸 README e CLAUDE.md refletindo o estado real do código
+- [ ] Revisão final com `/impeccable audit`, se quiser uma segunda opinião
 
 ## Semana 01–04/12 — Entrega
 - [ ] Ensaiar o roteiro do pitch (CLAUDE.md §14) do começo ao fim, cronometrado
@@ -88,7 +107,7 @@ As telas já existem de verdade. Duas opções para a entrega:
 Você precisa conseguir explicar cada arquivo sem consultar nada (CLAUDE.md §13). Ordem sugerida — cada passo usa o anterior:
 
 - [ ] `src/schema.sql` — as 5 tabelas e por que cada `UNIQUE`, `CHECK`, `CASCADE`, `RESTRICT`
-- [ ] `src/db.js` — conexão, `PRAGMA foreign_keys`, `DB_PATH`
+- [ ] `src/db.js` — arquivo local × Turso, `consultar`/`obter`/`executar`/`transacao`, por que tudo é `await`
 - [ ] `src/seed.js` — `INSERT OR IGNORE`, `bcrypt.hashSync`
 - [ ] `src/server.js` — ordem dos middlewares, sessão, `app.locals`, 404/500
 - [ ] `src/repositories/eventosRepo.js` — `COUNT` + `LEFT JOIN` + `GROUP BY` para as vagas
