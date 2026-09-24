@@ -34,7 +34,8 @@ Um único processo Node.js. O servidor monta o HTML (EJS) e devolve pronto para 
 |---|---|---|---|
 | Entrada | `src/server.js` | Configura Express, sessão, estáticos; registra rotas; 404/500 | Regra de negócio, SQL |
 | Rotas | `src/routes/*.js` | Lê `req`, valida entrada, aplica as regras (RN), chama repositories, escolhe a view ou redireciona | **SQL** (nunca importa `db.js`) |
-| Middleware | `src/middlewares/requireAuth.js` | Barra quem não está logado | Qualquer outra coisa |
+| Middlewares | `src/middlewares/requireAuth.js`, `carregarEvento.js` | Barrar quem não está logado; buscar o evento do `:id` (ou 404) | Qualquer outra coisa |
+| Validação | `src/validacoes.js` | Limpar e validar dados de formulário (RULES.md §2); `lerId`, `hojeLocal` | Consultar o banco |
 | Repositories | `src/repositories/*Repo.js` | Todo o SQL, sempre com `?` (parâmetros) | Ler `req`/`res`, renderizar |
 | Banco | `src/db.js`, `src/schema.sql` | Abre conexão, liga FKs, cria tabelas | Consultas de negócio |
 | Views | `views/**/*.ejs` | Mostrar dados já prontos | Consultar banco, calcular regra |
@@ -49,17 +50,20 @@ Regra de ouro: **rota → repository → db**. Se uma rota precisa de um dado no
 Exemplo: aluno envia o formulário de inscrição (`POST /eventos/5/inscrever`).
 
 1. `express.urlencoded` transforma o corpo do formulário em `req.body = { nome, email, turma }`.
-2. `routes/public.js` valida os campos (RULES.md §2). Se algo falhar → `res.status(422).render('public/inscrever', { erros, valores })` e para aqui.
-3. Normaliza o e-mail (`trim().toLowerCase()`).
+2. O middleware `carregarEvento` busca o evento 5 e guarda em `req.evento` (não existe → 404).
+3. `validarInscricao(req.body)` (em `validacoes.js`) limpa os campos e normaliza o e-mail (`trim().toLowerCase()`). Se algo falhar → `res.status(422).render('public/inscrever', { erros, valores })` e para aqui.
 4. Chama `inscricoesRepo.inscrever(eventoId, dados)`, que roda **numa transação**:
    1. busca o evento — não existe → erro "não encontrado";
    2. evento encerrado ou data passada → erro RN03;
-   3. conta inscritos ≥ capacidade → erro RN01;
-   4. busca participante pelo e-mail; se não existe, cria;
-   5. já inscrito neste evento → erro RN02;
+   3. já inscrito neste evento (join com `participantes` pelo e-mail) → erro RN02;
+   4. conta inscritos ≥ capacidade → erro RN01;
+   5. busca participante pelo e-mail; se não existe, cria;
    6. `INSERT` da inscrição.
+   Se mesmo assim a `UNIQUE` do banco barrar, o erro vira a mensagem da RN02.
 5. Erro de regra → volta ao formulário com a mensagem (status 409). Sucesso → guarda `req.session.ultimaInscricao` e **redireciona** (`303`) para `/eventos/5/confirmacao`.
 6. A confirmação lê a sessão, mostra os dados e apaga `ultimaInscricao`.
+
+A duplicidade é conferida **antes** das vagas: quem já está inscrito num evento lotado recebe "já está inscrito", que é a informação útil para ele.
 
 Padrão usado em todos os formulários: **POST → validação → redirect (PRG)**. Assim o F5 na página seguinte não reenvia o formulário.
 
@@ -129,7 +133,9 @@ Só funcionam porque o `db.js` liga `PRAGMA foreign_keys = ON`.
 
 ### Datas e horários
 
-Guardados como texto (`'2026-10-01'`, `'19:00'`). Esse formato ordena certo com `ORDER BY` e compara certo com `>=`. "Hoje" é sempre `date('now', 'localtime')` — sem `localtime`, o SQLite usa UTC (3 h à frente de Brasília). Formatar para `dd/mm/aaaa` só na view.
+Guardados como texto (`'2026-10-01'`, `'19:00'`). Esse formato ordena certo com `ORDER BY` e compara certo com `>=`. "Hoje" é sempre `date('now', 'localtime')` — sem `localtime`, o SQLite usa UTC (3 h à frente de Brasília). Formatar para `dd/mm/aaaa` só na view, com `formatarData()` / `formatarDataHora()` (definidas em `app.locals` no `server.js`, disponíveis em toda view).
+
+`criado_em` e `data_inscricao` usam `CURRENT_TIMESTAMP`, que grava em **UTC**. Ao ler, converter: `datetime(i.data_inscricao, 'localtime')` (já feito no `inscricoesRepo`).
 
 ---
 
@@ -141,42 +147,44 @@ Status: ✅ pronto · ⬜ a fazer.
 | | Rota | Repository | View |
 |---|---|---|---|
 | ✅ | `GET /` | `eventosRepo.listarAbertos(categoriaId)`, `categoriasRepo.listar()` | `public/home` |
-| ⬜ | `GET /eventos/:id` | `eventosRepo.buscarPorId(id)` | `public/evento` |
-| ⬜ | `GET /eventos/:id/inscrever` | `eventosRepo.buscarPorId(id)` | `public/inscrever` |
-| ⬜ | `POST /eventos/:id/inscrever` | `inscricoesRepo.inscrever(eventoId, dados)` | redirect ou `public/inscrever` |
-| ⬜ | `GET /eventos/:id/confirmacao` | — (lê a sessão) | `public/confirmacao` |
+| ✅ | `GET /eventos/:id` | `eventosRepo.buscarPorId(id)` | `public/evento` |
+| ✅ | `GET /eventos/:id/inscrever` | `eventosRepo.buscarPorId(id)` | `public/inscrever` |
+| ✅ | `POST /eventos/:id/inscrever` | `inscricoesRepo.inscrever(eventoId, dados)` | redirect ou `public/inscrever` |
+| ✅ | `GET /eventos/:id/confirmacao` | — (lê a sessão) | `public/confirmacao` |
 
 ### Autenticação — `routes/auth.js`
 | | Rota | Repository | View |
 |---|---|---|---|
-| ⬜ | `GET /admin/login` | — | `admin/login` |
-| ⬜ | `POST /admin/login` | `usuariosRepo.buscarPorEmail(email)` | redirect ou `admin/login` |
-| ⬜ | `POST /admin/logout` | — | redirect `/` |
+| ✅ | `GET /admin/login` | — | `admin/login` |
+| ✅ | `POST /admin/login` | `usuariosRepo.buscarPorEmail(email)` | redirect ou `admin/login` |
+| ✅ | `POST /admin/logout` | — | redirect `/` |
 
 ### Painel — `routes/admin.js` (tudo com `requireAuth`)
 | | Rota | Repository | View |
 |---|---|---|---|
-| ⬜ | `GET /admin` | `eventosRepo.resumo()`, `inscricoesRepo.recentes(n)` | `admin/dashboard` |
-| ⬜ | `GET /admin/eventos` | `eventosRepo.listarTodos()` | `admin/eventos-lista` |
-| ⬜ | `GET /admin/eventos/novo` | `categoriasRepo.listar()` | `admin/evento-form` |
-| ⬜ | `POST /admin/eventos` | `eventosRepo.criar(dados)` | redirect ou `admin/evento-form` |
-| ⬜ | `GET /admin/eventos/:id/editar` | `eventosRepo.buscarPorId(id)` | `admin/evento-form` |
-| ⬜ | `POST /admin/eventos/:id` | `eventosRepo.atualizar(id, dados)` | redirect ou `admin/evento-form` |
-| ⬜ | `POST /admin/eventos/:id/excluir` | `eventosRepo.excluir(id)` | redirect |
-| ⬜ | `GET /admin/eventos/:id/inscritos` | `inscricoesRepo.listarPorEvento(id)` | `admin/inscritos` |
-| ⬜ | `POST /admin/inscricoes/:id/presenca` | `inscricoesRepo.alternarPresenca(id)` | redirect `…/inscritos#inscricao-ID` |
-| ⬜ | `GET /admin/categorias` | `categoriasRepo.listarComTotal()` | `admin/categorias` |
-| ⬜ | `POST /admin/categorias` | `categoriasRepo.criar(nome)` | redirect |
-| ⬜ | `POST /admin/categorias/:id/excluir` | `categoriasRepo.contarEventos(id)`, `categoriasRepo.excluir(id)` | redirect |
+| ✅ | `GET /admin` | `eventosRepo.resumo()`, `eventosRepo.listarAbertos()`, `inscricoesRepo.recentes(8)` | `admin/dashboard` |
+| ✅ | `GET /admin/eventos` | `eventosRepo.listarTodos()` | `admin/eventos-lista` |
+| ✅ | `GET /admin/eventos/novo` | `categoriasRepo.listar()` | `admin/evento-form` |
+| ✅ | `POST /admin/eventos` | `eventosRepo.criar(dados)` | redirect ou `admin/evento-form` |
+| ✅ | `GET /admin/eventos/:id/editar` | `eventosRepo.buscarPorId(id)` | `admin/evento-form` |
+| ✅ | `POST /admin/eventos/:id` | `eventosRepo.atualizar(id, dados)` | redirect ou `admin/evento-form` |
+| ✅ | `POST /admin/eventos/:id/excluir` | `eventosRepo.excluir(id)` | redirect |
+| ✅ | `GET /admin/eventos/:id/inscritos` | `inscricoesRepo.listarPorEvento(id)` | `admin/inscritos` |
+| ✅ | `POST /admin/inscricoes/:id/presenca` | `inscricoesRepo.alternarPresenca(id)` | redirect `…/inscritos#inscricao-ID` |
+| ✅ | `GET /admin/categorias` | `categoriasRepo.listarComTotal()` | `admin/categorias` |
+| ✅ | `POST /admin/categorias` | `categoriasRepo.buscarPorNome(nome)`, `categoriasRepo.criar(nome)` | redirect ou `admin/categorias` |
+| ✅ | `POST /admin/categorias/:id/excluir` | `categoriasRepo.buscarPorId(id)`, `contarEventos(id)`, `excluir(id)` | redirect |
 
 ### API JSON — `routes/api.js`
 | | Rota | Repository | Proteção |
 |---|---|---|---|
-| ⬜ | `GET /api/eventos` | `eventosRepo.listarAbertos()` | pública |
-| ⬜ | `GET /api/eventos/:id` | `eventosRepo.buscarPorId(id)` | pública |
-| ⬜ | `GET /api/eventos/:id/inscritos` | `inscricoesRepo.listarPorEvento(id)` | `requireAuth` |
+| ✅ | `GET /api/eventos` | `eventosRepo.listarAbertos()` | pública |
+| ✅ | `GET /api/eventos/:id` | `eventosRepo.buscarPorId(id)` | pública |
+| ✅ | `GET /api/eventos/:id/inscritos` | `inscricoesRepo.listarPorEvento(id)` | `requireAuth` |
 
-Os nomes das funções acima são o **plano** — ao criar, manter esses nomes (ou atualizar esta tabela).
+Ao criar ou renomear uma função de repository, atualizar esta tabela.
+
+O teste de ponta a ponta usado em 24/09 cobriu todas as linhas acima (60 verificações, todas passando) — ver [MEMORY.md](MEMORY.md).
 
 ---
 
@@ -187,8 +195,10 @@ Guardada em memória pelo `express-session` (some quando o servidor reinicia —
 | Chave | Conteúdo | Quem grava | Quem lê/apaga |
 |---|---|---|---|
 | `req.session.usuario` | `{ id, nome }` do organizador | `POST /admin/login` | `requireAuth`, header (via `res.locals.usuario`); apagada no logout |
-| `req.session.ultimaInscricao` | `{ eventoId, nome, titulo, data, hora, local }` | `POST /eventos/:id/inscrever` | `GET /eventos/:id/confirmacao` (apaga depois de mostrar) |
-| `req.session.aviso` | `{ tipo: 'sucesso' \| 'erro', texto }` | rotas do admin, após criar/editar/excluir | próxima página renderizada (apaga depois de mostrar) |
+| `req.session.ultimaInscricao` | `{ eventoId, nome, email }` (os dados do evento vêm do banco) | `POST /eventos/:id/inscrever` | `GET /eventos/:id/confirmacao` (apaga depois de mostrar) |
+| `req.session.aviso` | `{ tipo: 'sucesso' \| 'erro', texto }` | `avisar(req, tipo, texto)` nas rotas do admin | middleware do `server.js` passa para `res.locals.aviso` e apaga; o `header.ejs` mostra |
+
+O login usa `req.session.regenerate` (id de sessão novo a cada login) e o logout `req.session.destroy`.
 
 Nunca guardar senha nem hash na sessão.
 
@@ -202,8 +212,9 @@ Nunca guardar senha nem hash na sessão.
 | Regra de negócio barrou (esgotado, duplicado, encerrado) | `409` | Mesma view, com a mensagem da RN |
 | Sucesso de um POST | `303` | Redirect (PRG) |
 | Id inexistente ou não numérico | `404` | `public/404` (ou JSON `{ erro }` na API) |
-| Não logado em rota protegida | `302` | Redirect para `/admin/login` |
-| Erro inesperado | `500` | Página genérica; detalhe só no console do servidor (**a fazer**) |
+| Não logado em rota protegida | `302` | Redirect para `/admin/login` (na API: `401` com `{ erro }`) |
+| Login errado | `401` | `admin/login` com "E-mail ou senha incorretos." |
+| Erro inesperado | `500` | `public/erro`; detalhe só no console do servidor |
 
 ---
 
@@ -224,3 +235,6 @@ Registro curto do porquê. Decisões novas vão aqui **e** no [MEMORY.md](MEMORY
 | D09 | Porta padrão 3333 | A 3000 está ocupada por outro projeto na máquina | 3000 |
 | D10 | Sem biblioteca de CSRF; cookie `sameSite: 'lax'` | O `lax` já impede outro site de enviar POST com a sessão; menos uma dependência | `csurf` (descontinuado) |
 | D11 | Sessão em memória | Um único servidor, sem produção real | Store em SQLite |
+| D12 | Validação num módulo próprio (`validacoes.js`), sem biblioteca | Fácil de ler e explicar; mensagens exatas do RULES.md | `express-validator`, `joi` |
+| D13 | JavaScript no navegador só para `confirm()` ao excluir (`public/js/confirmar.js`) | Tudo funciona sem JS (RNF04) | Excluir sem pedir confirmação |
+| D14 | Seed de demonstração separado (`npm run seed:demo`), só com banco vazio | Nunca mistura dados de teste com dados reais | Dados de teste dentro do `seed.js` |

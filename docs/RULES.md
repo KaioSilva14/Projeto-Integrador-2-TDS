@@ -19,7 +19,8 @@ Uma inscrição só é aceita se `COUNT(inscricoes do evento) < capacidade`.
 ### RN02 — Uma inscrição por pessoa por evento
 A pessoa é identificada pelo e-mail, normalizado com `trim().toLowerCase()` **antes** de qualquer consulta.
 - Verificar primeiro no código (join `inscricoes` + `participantes`); a `UNIQUE` do banco é a segunda linha de defesa.
-- E-mail já existente em `participantes` → reaproveitar o participante (e atualizar nome/turma com o que foi digitado agora).
+- E-mail já existente em `participantes` → reaproveitar o participante **sem alterar** nome e turma. (Se atualizasse, qualquer pessoa que digitasse o e-mail de um colega poderia trocar o nome dele em todas as listas.)
+- Ordem das checagens: evento existe → RN03 → RN02 → RN01. Quem já está inscrito num evento lotado recebe "já está inscrito", que é o que interessa para ele.
 - Mensagem: **"Este e-mail já está inscrito neste evento."**
 - Onde: `inscricoesRepo.inscrever`.
 - Teste: inscrever `Ana@Escola.com` e depois `ana@escola.com ` no mesmo evento → recusado.

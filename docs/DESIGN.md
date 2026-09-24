@@ -18,6 +18,8 @@ colors:
   texto: "#1E293B"
   texto-suave: "#64748B"
   borda: "#E2E8F0"
+  borda-campo: "#8391A5"
+  destaque-fundo: "#EFF6FF"
 typography:
   titulo-pagina:
     fontFamily: "Poppins, system-ui, sans-serif"
@@ -69,10 +71,20 @@ components:
     rounded: "{rounded.campo}"
     padding: "10px 18px"
   botao-perigo:
-    backgroundColor: "{colors.alerta-forte}"
-    textColor: "{colors.superficie}"
+    backgroundColor: "{colors.superficie}"
+    textColor: "{colors.alerta-texto}"
     rounded: "{rounded.campo}"
     padding: "10px 18px"
+  botao-perigo-hover:
+    backgroundColor: "{colors.alerta-fundo}"
+  botao-presenca:
+    backgroundColor: "{colors.superficie}"
+    textColor: "{colors.texto}"
+    rounded: "{rounded.campo}"
+    padding: "8px 14px"
+  botao-presenca-presente:
+    backgroundColor: "{colors.sucesso-fundo}"
+    textColor: "{colors.sucesso-texto}"
   card:
     backgroundColor: "{colors.superficie}"
     rounded: "{rounded.card}"
@@ -125,11 +137,13 @@ A paleta da identidade (CLAUDE.md, seção 9) foi mantida e completada com os to
 | `texto-suave` sobre `superficie` / `fundo` | 4.76 / 4.55 : 1 ✅ | informação secundária — **no limite, não clarear** |
 | `sucesso-texto` sobre `sucesso-fundo` | 4.84 : 1 ✅ | badge "vagas" |
 | `alerta-texto` sobre `alerta-fundo` | 5.30 : 1 ✅ | badge "Esgotado", mensagens de erro |
-| branco sobre `alerta-forte` | 4.83 : 1 ✅ | botão "Excluir" |
+| branco sobre `alerta-forte` | 4.83 : 1 ✅ | reservado para um futuro botão de confirmação destrutiva |
+| `borda-campo` sobre `superficie` | 3.20 : 1 ✅ | contorno de campos de formulário (mínimo 3:1 — WCAG 1.4.11) |
+| `borda` sobre `superficie` | 1.23 : 1 | só divisórias e cards — **nunca** como único contorno de um campo |
 | branco sobre `alerta` (`#EF4444`) | 3.76 : 1 ❌ | **não usar para texto** |
 | `sucesso` (`#10B981`) sobre branco | 2.54 : 1 ❌ | **não usar para texto** |
 
-Por isso: `sucesso` e `alerta` (as cores "da marca") ficam para **bordas, ícones e barras**; texto verde usa `sucesso-texto`, texto vermelho usa `alerta-texto`, botão vermelho usa `alerta-forte`.
+Por isso: `sucesso` e `alerta` (as cores "da marca") ficam para **bordas, ícones e barras**; texto verde usa `sucesso-texto`, texto vermelho usa `alerta-texto`.
 
 Significado fixo — não usar a cor para outra coisa:
 - **Azul** = ação e navegação.
@@ -182,21 +196,25 @@ Quase plano. Profundidade só para dizer "isto é clicável":
 
 ## Components
 
-Cada componente é uma classe no `style.css`. ✅ = já existe no CSS · ⬜ = criar quando a tela precisar.
+Cada componente é uma classe no `style.css`. Todos já existem.
 
-| | Componente | Classe | Notas |
-|---|---|---|---|
-| ✅ | Botão primário | `.botao` | Uma ação principal por tela |
-| ✅ | Botão secundário | `.botao .botao-secundario` | Cancelar, voltar, filtrar |
-| ⬜ | Botão de perigo | `.botao .botao-perigo` | Só "Excluir"; sempre com `confirm()` antes |
-| ✅ | Card de evento | `.card` + `.card-link` | O card inteiro é o link (área de toque grande) |
-| ✅ | Badge de status | `.badge .badge-disponivel` / `-esgotado` / `-encerrado` | Texto sempre junto da cor (não depender só da cor) |
-| ✅ | Estado vazio | `.vazio` | Diz o que falta **e** o que vai aparecer ali |
-| ✅ | Campo | `input`, `select`, `textarea` | Foco com contorno azul de 2 px |
-| ⬜ | Grupo de campo | `.campo` (rótulo + campo + erro) | Rótulo sempre visível acima; erro em `alerta-texto` logo abaixo do campo |
-| ⬜ | Aviso | `.aviso .aviso-sucesso` / `.aviso-erro` | Faixa no topo do conteúdo com borda esquerda de 4 px em `sucesso`/`alerta` e texto em `-texto` |
-| ⬜ | Tabela | `.tabela` | Cabeçalho em `rotulo`; linhas com borda inferior; números alinhados à direita |
-| ⬜ | Botão de presença | `.botao-presenca` | Ausente: secundário. Presente: fundo `sucesso-fundo`, texto `sucesso-texto`, "✓ Presente" |
+| Componente | Classe | Notas |
+|---|---|---|
+| Botão primário | `.botao` | Uma ação principal por tela |
+| Botão secundário | `.botao .botao-secundario` | Cancelar, voltar, ações de linha de tabela |
+| Botão de perigo | `.botao .botao-perigo` | **Contornado** (texto vermelho, fundo branco): numa tabela com 7 eventos, 7 botões vermelhos cheios seriam a coisa mais chamativa da tela. Sempre com `data-confirmar` |
+| Botão largo | `.botao-largo` | Largura total no celular, normal a partir de 600 px |
+| Botão pequeno | `.botao-pequeno` | Ações dentro de tabela |
+| Card de evento | `.card` + `.card-link` | O card inteiro é o link (área de toque grande) |
+| Badge de status | `partials/badge-evento.ejs` → `.badge-disponivel` / `-esgotado` / `-encerrado` | Texto sempre junto da cor (não depender só da cor). Usar o partial, não repetir a lógica |
+| Estado vazio | `.vazio` | Diz o que falta **e** o que vai aparecer ali |
+| Grupo de campo | `.campo` (rótulo + campo + `.erro-campo`) | Rótulo sempre visível acima; erro em `alerta-texto` logo abaixo; campo com erro ganha `aria-invalid` e borda vermelha |
+| Linha de campos | `.campos-linha`, `.campo-largo` | Data/início/término lado a lado no PC, empilhados no celular |
+| Aviso | `.aviso .aviso-sucesso` / `.aviso-erro` | Faixa no topo do conteúdo, borda esquerda de 4 px |
+| Números do painel | `.numeros` + `.numero` | Um número grande por caixa |
+| Tabela | `.tabela-rolagem` > `.tabela` | Rola dentro da caixa no celular; `span.info` = 2ª linha da célula; `.numero-coluna` à direita |
+| Botão de presença | `.botao-presenca` (+ `.presente`) | Ausente: contornado. Presente: `sucesso-fundo` + "✓ Presente". Fica na **2ª coluna**, logo após o nome, para caber no celular |
+| Detalhes do evento | `.detalhe-dados` (`dl`) | 2 colunas no celular, 4 no PC |
 
 ### Estados obrigatórios
 
@@ -222,8 +240,9 @@ Pouco e rápido — interface de trabalho, não vitrine.
 **Evitar**
 - ❌ Texto em `#EF4444` ou `#10B981` puros (contraste insuficiente — ver Colors).
 - ❌ Gradientes, sombras fortes, vidro fosco, fundos com textura — o "visual de template".
-- ❌ Emoji como ícone de interface (exceto o ✓ do check-in).
+- ❌ Emoji como ícone de interface (exceto o ✓ da confirmação e do check-in).
 - ❌ Mais de um botão primário azul na mesma tela.
+- ❌ Vermelho cheio repetido em listas (usar o `.botao-perigo` contornado).
 - ❌ Esconder o rótulo do campo e usar só o `placeholder`.
 - ❌ Framework de CSS (Bootstrap, Tailwind) — decisão do projeto (CLAUDE.md, seção 4).
 - ❌ Animação em ação repetitiva (check-in, filtro).

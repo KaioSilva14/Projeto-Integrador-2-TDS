@@ -14,11 +14,12 @@ Disciplinas: Banco de Dados II, Back-End, Inovação Tecnológica e Empreendedor
 **Pré-requisitos:** Node.js LTS e Git.
 
 ```bash
-git clone <url-do-repositorio>
-cd <pasta-do-repositorio>
+git clone https://github.com/KaioSilva14/Projeto-Integrador-2-TDS.git
+cd Projeto-Integrador-2-TDS
 npm install
 cp .env.example .env   # abrir o .env e preencher SESSION_SECRET e ADMIN_SENHA
 npm run seed           # cria o banco, as categorias padrão e o organizador
+npm run seed:demo      # opcional: eventos e inscrições de exemplo
 npm run dev            # http://localhost:3333
 ```
 
@@ -27,6 +28,9 @@ Para gerar o `SESSION_SECRET`:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
+**Área pública:** `/` — eventos abertos, detalhes e inscrição (sem login).
+**API JSON:** `/api/eventos` e `/api/eventos/:id`.
+
 **Login do organizador:** `/admin/login` com o `ADMIN_EMAIL` e a `ADMIN_SENHA` do seu `.env`.
 
 | Comando | O que faz |
@@ -34,6 +38,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 | `npm run dev` | Inicia com reinício automático ao salvar |
 | `npm start` | Inicia sem reinício automático |
 | `npm run seed` | Cria categorias e organizador (pode rodar várias vezes) |
+| `npm run seed:demo` | Eventos e inscrições de exemplo (só com o banco sem eventos) |
 
 **Recomeçar o banco do zero** (apaga tudo; pare o servidor antes):
 ```bash

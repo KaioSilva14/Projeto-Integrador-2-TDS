@@ -351,8 +351,11 @@ Projeto-Integrador-2-TDS/
 │   ├── db.js                     # conexão better-sqlite3 + execução do schema.sql
 │   ├── schema.sql                # DDL da seção 5.3
 │   ├── seed.js                   # cria categorias padrão + usuário organizador
+│   ├── seed-demo.js              # eventos e inscrições de exemplo (npm run seed:demo)
+│   ├── validacoes.js             # validação dos formulários (docs/RULES.md §2)
 │   ├── middlewares/
-│   │   └── requireAuth.js
+│   │   ├── requireAuth.js
+│   │   └── carregarEvento.js     # busca o evento do :id ou responde 404
 │   ├── routes/
 │   │   ├── public.js              # home, detalhes, inscrição
 │   │   ├── admin.js                # dashboard, eventos, categorias, inscritos
@@ -365,11 +368,12 @@ Projeto-Integrador-2-TDS/
 │       ├── inscricoesRepo.js
 │       └── usuariosRepo.js
 ├── views/                         # EJS
-│   ├── partials/ (header.ejs, footer.ejs)
-│   ├── public/ (home, evento, inscrever, confirmacao)
+│   ├── partials/ (header, footer, badge-evento)
+│   ├── public/ (home, evento, inscrever, confirmacao, 404, erro)
 │   └── admin/ (login, dashboard, eventos-lista, evento-form, inscritos, categorias)
 └── public/
-    └── css/style.css
+    ├── css/style.css
+    └── js/confirmar.js            # só o confirm() antes de excluir — tudo funciona sem JS
 ```
 
 **Convenção:** nenhuma rota fala direto com `better-sqlite3` — sempre passa por um `repository`. Isso deixa o código organizado e fácil de explicar linha a linha na banca.
@@ -406,14 +410,14 @@ O plano do professor pressupõe 4 pessoas trabalhando em paralelo. Como você fa
 
 ## 13. Checklist de entrega (04/12)
 
-- [ ] Problema e público-alvo definidos
+- [x] Problema e público-alvo definidos
 - [ ] Protótipo das 8 telas
-- [ ] `schema.sql` executando sem erro, com dados de teste
-- [ ] CRUD de eventos e categorias funcionando (admin)
-- [ ] Fluxo público de inscrição funcionando, com bloqueio de vaga esgotada e duplicidade
-- [ ] Login do organizador funcionando com sessão
-- [ ] Check-in de presença funcionando
-- [ ] Rotas `/api/*` respondendo JSON válido
+- [x] `schema.sql` executando sem erro, com dados de teste
+- [x] CRUD de eventos e categorias funcionando (admin)
+- [x] Fluxo público de inscrição funcionando, com bloqueio de vaga esgotada e duplicidade
+- [x] Login do organizador funcionando com sessão
+- [x] Check-in de presença funcionando
+- [x] Rotas `/api/*` respondendo JSON válido
 - [ ] README/CLAUDE.md atualizado refletindo o estado real do código
 - [ ] Você consegue explicar cada rota e cada tabela sem consultar nada
 
@@ -462,7 +466,7 @@ O arquivo real é o `package.json` na raiz — não copiar a lista para cá (ela
 | `dotenv` | 18.x | lê o `.env` |
 | `nodemon` (dev) | 3.x | reinicia o servidor ao salvar |
 
-Scripts: `npm start` (produção), `npm run dev` (desenvolvimento), `npm run seed` (dados iniciais).
+Scripts: `npm start` (produção), `npm run dev` (desenvolvimento), `npm run seed` (dados iniciais), `npm run seed:demo` (eventos e inscrições de exemplo — só roda com o banco sem eventos).
 
 > O npm 11 bloqueia scripts de instalação por padrão. O `better-sqlite3` precisa do dele (baixa o binário nativo), por isso o `package.json` tem `"allowScripts": { "better-sqlite3@13.0.3": true }`. Se atualizar a versão do pacote, rodar `npm approve-scripts better-sqlite3` de novo.
 
@@ -491,6 +495,7 @@ cd <pasta-do-repositorio>
 npm install
 cp .env.example .env   # depois abrir o .env e preencher SESSION_SECRET e ADMIN_SENHA
 npm run seed           # cria as tabelas (schema.sql), categorias padrão e o usuário organizador
+npm run seed:demo      # opcional: 7 eventos e 32 inscrições de exemplo
 npm run dev            # inicia em http://localhost:3333
 ```
 
@@ -506,6 +511,7 @@ A senha **não** fica no código (`seed.js` é versionado e iria parar no GitHub
 ```bash
 rm data/eventos.db
 npm run seed
+npm run seed:demo      # opcional — antes do pitch, para ter dados limpos de demonstração
 ```
 Apaga **todos** os eventos e inscrições. Com o servidor rodando, pará-lo antes (o Windows não deixa apagar arquivo aberto).
 

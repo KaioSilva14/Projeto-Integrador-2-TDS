@@ -57,82 +57,82 @@ Cada história só está pronta quando **todos** os critérios passam. Os códig
 
 **HU01 — Ver os eventos abertos**
 Como aluno, quero ver os próximos eventos da escola para decidir de qual participar.
-- [ ] A home (`/`) mostra só eventos com status `aberto` e data de hoje em diante.
-- [ ] Cada card mostra título, categoria, data (dd/mm/aaaa), horário, local e vagas restantes.
-- [ ] Evento sem vagas aparece com o selo "Esgotado" (não some da lista).
-- [ ] Eventos ordenados do mais próximo para o mais distante.
-- [ ] Sem nenhum evento aberto, aparece uma mensagem explicando isso (não uma página em branco).
+- [x] A home (`/`) mostra só eventos com status `aberto` e data de hoje em diante.
+- [x] Cada card mostra título, categoria, data (dd/mm/aaaa), horário, local e vagas restantes.
+- [x] Evento sem vagas aparece com o selo "Esgotado" (não some da lista).
+- [x] Eventos ordenados do mais próximo para o mais distante.
+- [x] Sem nenhum evento aberto, aparece uma mensagem explicando isso (não uma página em branco).
 
 **HU02 — Filtrar por categoria**
 Como aluno, quero filtrar por categoria para achar rápido o tipo de evento que me interessa.
-- [ ] Um seletor com "Todas" + as categorias cadastradas filtra a lista.
-- [ ] O filtro fica na URL (`/?categoria=2`) — dá para mandar o link filtrado no grupo.
-- [ ] Categoria inexistente na URL não quebra a página (mostra lista vazia ou todas).
+- [x] Um seletor com "Todas" + as categorias cadastradas filtra a lista.
+- [x] O filtro fica na URL (`/?categoria=2`) — dá para mandar o link filtrado no grupo.
+- [x] Categoria inexistente na URL não quebra a página (mostra lista vazia ou todas).
 
 **HU03 — Ver detalhes de um evento**
 Como aluno, quero ver todas as informações de um evento antes de me inscrever.
-- [ ] `/eventos/:id` mostra título, categoria, descrição, data, horário de início e fim, local, capacidade e vagas restantes.
-- [ ] O botão "Inscrever-se" só aparece se o evento aceita inscrição (RN01, RN03). Caso contrário, aparece o motivo: "Esgotado" ou "Inscrições encerradas".
-- [ ] Id inexistente ou não numérico → página 404.
+- [x] `/eventos/:id` mostra título, categoria, descrição, data, horário de início e fim, local, capacidade e vagas restantes.
+- [x] O botão "Inscrever-se" só aparece se o evento aceita inscrição (RN01, RN03). Caso contrário, aparece o motivo: "Esgotado" ou "Inscrições encerradas".
+- [x] Id inexistente ou não numérico → página 404.
 
 **HU04 — Inscrever-se**
 Como aluno, quero me inscrever informando nome, e-mail e turma, sem criar conta.
-- [ ] Formulário com três campos obrigatórios: nome, e-mail, turma.
-- [ ] Todas as validações do [RULES.md](RULES.md) (seção 2) são feitas **no servidor**.
-- [ ] Erro de validação: o formulário volta com a mensagem e com os dados já digitados (o aluno não redigita tudo).
-- [ ] Evento esgotado, encerrado ou e-mail já inscrito → recusado com a mensagem de RN01/RN02/RN03.
-- [ ] Sucesso → redireciona para a confirmação.
+- [x] Formulário com três campos obrigatórios: nome, e-mail, turma.
+- [x] Todas as validações do [RULES.md](RULES.md) (seção 2) são feitas **no servidor**.
+- [x] Erro de validação: o formulário volta com a mensagem e com os dados já digitados (o aluno não redigita tudo).
+- [x] Evento esgotado, encerrado ou e-mail já inscrito → recusado com a mensagem de RN01/RN02/RN03.
+- [x] Sucesso → redireciona para a confirmação.
 
 **HU05 — Receber confirmação**
 Como aluno, quero ver claramente que minha inscrição deu certo.
-- [ ] A página de confirmação mostra o nome do aluno, o evento, a data, o horário e o local.
-- [ ] Os dados vêm da sessão, não da URL (RN09). Abrir `/eventos/:id/confirmacao` sem ter se inscrito redireciona para os detalhes do evento.
-- [ ] Recarregar a página (F5) **não** cria uma segunda inscrição.
+- [x] A página de confirmação mostra o nome do aluno, o evento, a data, o horário e o local.
+- [x] Os dados vêm da sessão, não da URL (RN09). Abrir `/eventos/:id/confirmacao` sem ter se inscrito redireciona para os detalhes do evento.
+- [x] Recarregar a página (F5) **não** cria uma segunda inscrição.
 
 ### Organizador
 
 **HU06 — Entrar e sair do painel**
-- [ ] `/admin/login` pede e-mail e senha; senha conferida com `bcrypt.compare` (RN06).
-- [ ] Login errado → "E-mail ou senha incorretos." (não dizer qual dos dois errou).
-- [ ] Sem login, qualquer `/admin/*` redireciona para o login (RN07).
-- [ ] "Sair" encerra a sessão e volta para a home.
+- [x] `/admin/login` pede e-mail e senha; senha conferida com `bcrypt.compare` (RN06).
+- [x] Login errado → "E-mail ou senha incorretos." (não dizer qual dos dois errou).
+- [x] Sem login, qualquer `/admin/*` redireciona para o login (RN07).
+- [x] "Sair" encerra a sessão e volta para a home.
 
 **HU07 — Ver o resumo no painel**
-- [ ] `/admin` mostra: total de eventos abertos, total de inscrições, próximos eventos e as inscrições mais recentes.
+- [x] `/admin` mostra: total de eventos abertos, total de inscrições, próximos eventos e as inscrições mais recentes.
 
 **HU08 — Criar evento**
-- [ ] Formulário com todos os campos do evento; categoria escolhida numa lista.
-- [ ] Validações da seção 2 do RULES.md; erro volta com os dados preenchidos.
-- [ ] Sucesso → volta para a lista de eventos com a mensagem "Evento criado."
+- [x] Formulário com todos os campos do evento; categoria escolhida numa lista.
+- [x] Validações da seção 2 do RULES.md; erro volta com os dados preenchidos.
+- [x] Sucesso → volta para a lista de eventos com a mensagem "Evento criado."
 
 **HU09 — Editar e encerrar evento**
-- [ ] Mesmo formulário da criação, já preenchido.
-- [ ] Dá para mudar o status para `encerrado` (bloqueia novas inscrições — RN03).
-- [ ] Não dá para reduzir a capacidade para menos que o número de inscritos (RN08).
+- [x] Mesmo formulário da criação, já preenchido.
+- [x] Dá para mudar o status para `encerrado` (bloqueia novas inscrições — RN03).
+- [x] Não dá para reduzir a capacidade para menos que o número de inscritos (RN08).
 
 **HU10 — Excluir evento**
-- [ ] O navegador pede confirmação antes ("Excluir o evento X e suas N inscrições?").
-- [ ] Excluir o evento apaga as inscrições dele (RN04).
+- [x] O navegador pede confirmação antes ("Excluir o evento X e suas N inscrições?").
+- [x] Excluir o evento apaga as inscrições dele (RN04).
 
 **HU11 — Gerenciar categorias**
-- [ ] Listar, criar e excluir categorias.
-- [ ] Nome repetido é recusado.
-- [ ] Categoria com evento vinculado não pode ser excluída (RN05) — mensagem explica quantos eventos usam.
+- [x] Listar, criar e excluir categorias.
+- [x] Nome repetido é recusado.
+- [x] Categoria com evento vinculado não pode ser excluída (RN05) — mensagem explica quantos eventos usam.
 
 **HU12 — Ver inscritos de um evento**
-- [ ] `/admin/eventos/:id/inscritos` lista nome, e-mail, turma, data da inscrição e presença.
-- [ ] Mostra no topo: inscritos / capacidade e quantos presentes.
+- [x] `/admin/eventos/:id/inscritos` lista nome, e-mail, turma, data da inscrição e presença.
+- [x] Mostra no topo: inscritos / capacidade e quantos presentes.
 
 **HU13 — Fazer check-in**
-- [ ] Um botão por inscrito alterna presença (presente ↔ ausente).
-- [ ] Após clicar, a lista volta **na mesma posição** (âncora `#inscricao-ID`), para fazer a chamada sem perder o lugar.
+- [x] Um botão por inscrito alterna presença (presente ↔ ausente).
+- [x] Após clicar, a lista volta **na mesma posição** (âncora `#inscricao-ID`), para fazer a chamada sem perder o lugar.
 
 ### Sistema
 
 **HU14 — API JSON**
-- [ ] `GET /api/eventos` e `GET /api/eventos/:id` devolvem JSON válido, com vagas restantes calculadas.
-- [ ] `GET /api/eventos/:id/inscritos` exige login (RN07).
-- [ ] Id inexistente → `404` com `{ "erro": "Evento não encontrado." }`.
+- [x] `GET /api/eventos` e `GET /api/eventos/:id` devolvem JSON válido, com vagas restantes calculadas.
+- [x] `GET /api/eventos/:id/inscritos` exige login (RN07).
+- [x] Id inexistente → `404` com `{ "erro": "Evento não encontrado." }`.
 
 ---
 

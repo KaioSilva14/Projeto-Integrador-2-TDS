@@ -10,10 +10,11 @@
 
 *Atualizado em 24/09/2026.*
 
-- Fundação pronta: projeto inicializado, banco (`schema.sql`, `db.js`, `seed.js`) funcionando e testado, home listando eventos.
-- Documentação completa em `docs/` + `README.md`.
-- Ainda não existe: detalhes/inscrição, login, painel, API. Ver [TASKS.md](TASKS.md).
-- Git local com commits; **ainda sem repositório no GitHub**.
+- **MVP completo e testado**: fluxo público (home, detalhes, inscrição, confirmação), login, painel, CRUD de eventos e categorias, inscritos com check-in, API JSON.
+- Teste de ponta a ponta: 60 verificações cobrindo todas as HUs e RNs, todas passando. Telas conferidas em 360 px e 1280 px.
+- Banco de desenvolvimento com os dados de demonstração (`npm run seed:demo`).
+- GitHub: https://github.com/KaioSilva14/Projeto-Integrador-2-TDS
+- Próximo passo: estudar o código ([TASKS.md](TASKS.md), "Estudo do código") e entregar as etapas ao professor.
 
 ---
 
@@ -33,6 +34,12 @@ A tabela completa com alternativas está em [ARCHITECTURE.md §8](ARCHITECTURE.m
 | 24/09 | Confirmação de inscrição lida da sessão | Não expor dados trocando o id na URL |
 | 24/09 | Tons escuros para texto verde/vermelho (`#047857`, `#B91C1C`, `#DC2626`) | `#10B981` e `#EF4444` não passam no contraste (DESIGN.md) |
 | 24/09 | E-mail padrão do organizador: `organizador@escola.com` | Definido no CLAUDE.md §16.5 |
+| 24/09 | Participante existente **não** tem nome/turma atualizados numa nova inscrição | Senão, quem digitasse o e-mail de um colega trocaria o nome dele |
+| 24/09 | Duplicidade (RN02) é checada antes das vagas (RN01) | Quem já está inscrito num evento lotado recebe a mensagem útil |
+| 24/09 | Validação em `validacoes.js`, sem biblioteca | Mais fácil de explicar na banca |
+| 24/09 | Botão "Excluir" contornado, não vermelho cheio | Vermelho repetido em cada linha dominava a tela |
+| 24/09 | Coluna "Presença" logo após o nome na lista de inscritos | No celular o botão ficava fora da tela |
+| 24/09 | Borda dos campos `#8391A5` | `#E2E8F0` tinha contraste 1.2:1 (mínimo para contorno de campo: 3:1) |
 
 ---
 
@@ -58,6 +65,15 @@ Vêm desligados. O `db.js` executa `PRAGMA foreign_keys = ON` — nunca remover.
 **Não consigo apagar `data/eventos.db`**
 O Windows trava o arquivo enquanto o servidor está rodando. Parar o `npm run dev` (Ctrl+C) antes.
 
+**Horário da inscrição aparece 3 h adiantado**
+`CURRENT_TIMESTAMP` grava em UTC. Ler com `datetime(coluna, 'localtime')` (já feito no `inscricoesRepo`).
+
+**`attempt to write a readonly database`**
+Aconteceu ao apagar um `.db` enquanto outro processo ainda o tinha aberto e logo criar outro com o mesmo nome: o Windows deixa o arquivo "pendente de exclusão". Parar o servidor, esperar ele fechar e só então apagar.
+
+**Acentos virando "�" ao testar com `curl` no terminal**
+É o terminal do Windows mandando o texto em outra codificação, não o sistema. Pelo navegador os acentos e o "º" são gravados certo (testado com "Cecília Ñuñez Gonçalves", "2º TDS").
+
 **Skill Impeccable: clone do repositório falha com "Filename too long"**
 Só a pasta de testes do repositório tem caminhos longos demais para o Windows. A skill em si (`.claude/skills/impeccable`) foi recuperada separadamente e está completa.
 
@@ -66,7 +82,21 @@ Só a pasta de testes do repositório tem caminhos longos demais para o Windows.
 ## Perguntas em aberto
 
 - [ ] **Quantos integrantes?** O CLAUDE.md diz "4 integrantes no papel", mas a ficha lista 3 nomes (Heitor Eckel, Kaio Silva, Samuel Donato). Falta um nome ou o número está errado?
-- [ ] **URL do GitHub** — criar o repositório e anotar aqui.
+- [x] **URL do GitHub** — https://github.com/KaioSilva14/Projeto-Integrador-2-TDS
+
+---
+
+## Atenção
+
+**O projeto está dentro do OneDrive** (a Área de Trabalho é sincronizada). O OneDrive pode tentar sincronizar o `data/eventos.db` enquanto o servidor escreve nele, o que às vezes trava ou corrompe bancos SQLite. Se aparecer erro estranho de banco: pausar a sincronização do OneDrive enquanto trabalha, ou mover a pasta do projeto para fora do OneDrive (por exemplo, uma pasta `projetos` direto no disco C:). O código já está seguro no GitHub.
+
+**Como abrir no celular (mesma rede Wi-Fi)**
+1. No PC, `ipconfig` → anotar o "Endereço IPv4" (ex.: `192.168.0.15`).
+2. No celular: `http://192.168.0.15:3333`.
+3. Se não abrir, o Firewall do Windows está bloqueando o Node — permitir quando ele perguntar, ou liberar a porta 3333.
+
+**Teste de ponta a ponta**
+Existe um script (bash + curl) que confere as 60 verificações, mas ele ficou fora do projeto (depende do Git Bash). Tarefa aberta no TASKS.md: transformá-lo em `npm test` com o `node:test` que já vem no Node.
 
 ---
 
@@ -88,3 +118,8 @@ Só a pasta de testes do repositório tem caminhos longos demais para o Windows.
 - Banco resetado para o organizador passar a ser `organizador@escola.com`.
 - Criados `docs/` (PRD, ARCHITECTURE, RULES, DESIGN, TASKS, MEMORY) e `README.md`.
 - Tokens de cor do DESIGN.md aplicados no `style.css` (sem hex solto).
+- Repositório conectado ao GitHub e primeiro push.
+- **MVP inteiro implementado**: `validacoes.js`, 5 repositories, rotas `auth`/`admin`/`api`, middleware `carregarEvento`, 13 views, componentes CSS, `seed-demo.js`.
+- Teste de ponta a ponta com o servidor real: 60/60. Prints no Edge headless em 360 px e 1280 px.
+- Corrigidos depois dos prints: células da tabela quebrando (`.tabela .info` com `display: block`), botão de presença fora da tela no celular, botões "Excluir" chamativos demais, dados do evento empilhados no celular.
+- Docs atualizados (ARCHITECTURE, RULES, DESIGN, TASKS, PRD, README, CLAUDE.md).
