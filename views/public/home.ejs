@@ -1,0 +1,45 @@
+<%- include('../partials/header', { titulo: 'Próximos eventos' }) %>
+
+<section class="cabecalho-pagina">
+  <h1>Próximos eventos</h1>
+  <p class="subtitulo">Escolha um evento e garanta sua vaga. Não precisa criar conta.</p>
+</section>
+
+<form method="get" action="/" class="filtro">
+  <label for="categoria">Categoria</label>
+  <select name="categoria" id="categoria" onchange="this.form.submit()">
+    <option value="">Todas</option>
+    <% categorias.forEach(c => { %>
+      <option value="<%= c.id %>" <%= c.id === categoriaSelecionada ? 'selected' : '' %>><%= c.nome %></option>
+    <% }) %>
+  </select>
+  <noscript><button type="submit" class="botao botao-secundario">Filtrar</button></noscript>
+</form>
+
+<% if (eventos.length === 0) { %>
+  <div class="vazio">
+    <p><strong>Nenhum evento aberto no momento.</strong></p>
+    <p>Quando a coordenação publicar um evento, ele aparece aqui.</p>
+  </div>
+<% } else { %>
+  <ul class="lista-eventos">
+    <% eventos.forEach(e => {
+         const restantes = e.capacidade - e.vagas_ocupadas;
+         const [ano, mes, dia] = e.data_evento.split('-'); %>
+      <li class="card">
+        <a href="/eventos/<%= e.id %>" class="card-link">
+          <span class="categoria"><%= e.categoria %></span>
+          <h2><%= e.titulo %></h2>
+          <p class="info"><%= dia %>/<%= mes %>/<%= ano %> · <%= e.hora_inicio %> · <%= e.local %></p>
+          <% if (restantes > 0) { %>
+            <span class="badge badge-disponivel"><%= restantes %> <%= restantes === 1 ? 'vaga' : 'vagas' %></span>
+          <% } else { %>
+            <span class="badge badge-esgotado">Esgotado</span>
+          <% } %>
+        </a>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<%- include('../partials/footer') %>

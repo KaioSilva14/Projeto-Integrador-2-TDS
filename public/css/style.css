@@ -1,0 +1,287 @@
+/* Identidade visual — CLAUDE.md, seção 9. Um único arquivo, sem framework. */
+
+:root {
+  --cor-primaria: #2563EB;
+  --cor-primaria-escura: #1D4ED8;
+  --cor-sucesso: #10B981;
+  --cor-alerta: #EF4444;
+  --cor-fundo: #F8FAFC;
+  --cor-superficie: #FFFFFF;
+  --cor-texto: #1E293B;
+  --cor-texto-suave: #64748B;
+  --cor-borda: #E2E8F0;
+
+  --raio: 12px;
+  --sombra: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
+  --sombra-hover: 0 4px 12px rgba(15, 23, 42, 0.10);
+
+  --fonte-titulo: 'Poppins', system-ui, sans-serif;
+  --fonte-texto: 'Inter', system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: var(--fonte-texto);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fonte-titulo);
+  line-height: 1.25;
+  margin: 0;
+}
+
+a {
+  color: var(--cor-primaria);
+}
+
+.container {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+main.container {
+  flex: 1;
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
+
+/* ---------- Topo e rodapé ---------- */
+
+.topo {
+  background: var(--cor-superficie);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.topo-conteudo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.marca {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.topo nav a {
+  color: var(--cor-texto-suave);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+.topo nav a:hover {
+  color: var(--cor-primaria);
+}
+
+.rodape {
+  padding: 24px 0;
+  border-top: 1px solid var(--cor-borda);
+  color: var(--cor-texto-suave);
+  font-size: 0.875rem;
+}
+
+/* ---------- Cabeçalho de página ---------- */
+
+.cabecalho-pagina {
+  margin-bottom: 24px;
+}
+
+.cabecalho-pagina h1 {
+  font-size: 1.75rem;
+}
+
+.subtitulo {
+  margin: 8px 0 0;
+  color: var(--cor-texto-suave);
+}
+
+/* ---------- Filtro ---------- */
+
+.filtro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.filtro label {
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+select,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+  padding: 8px 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  background: var(--cor-superficie);
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 1px;
+}
+
+/* ---------- Botões ---------- */
+
+.botao {
+  display: inline-block;
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: var(--cor-primaria);
+  color: #FFFFFF;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao:hover {
+  background: var(--cor-primaria-escura);
+}
+
+.botao-secundario {
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  border-color: var(--cor-borda);
+}
+
+.botao-secundario:hover {
+  background: var(--cor-fundo);
+}
+
+/* ---------- Cards de evento ---------- */
+
+.lista-eventos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+
+.card:hover {
+  box-shadow: var(--sombra-hover);
+  transform: translateY(-2px);
+}
+
+.card-link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  height: 100%;
+  padding: 20px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card h2 {
+  font-size: 1.125rem;
+}
+
+.categoria {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cor-primaria);
+}
+
+.info {
+  margin: 0;
+  color: var(--cor-texto-suave);
+  font-size: 0.9375rem;
+}
+
+/* ---------- Badges de status ---------- */
+
+.badge {
+  display: inline-block;
+  margin-top: auto;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.badge-disponivel {
+  background: #D1FAE5;
+  color: #047857;
+}
+
+.badge-esgotado {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+
+.badge-encerrado {
+  background: #F1F5F9;
+  color: #475569;
+}
+
+/* ---------- Estado vazio ---------- */
+
+.vazio {
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--cor-superficie);
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio);
+  color: var(--cor-texto-suave);
+}
+
+.vazio p {
+  margin: 4px 0;
+}
+
+.vazio strong {
+  color: var(--cor-texto);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}

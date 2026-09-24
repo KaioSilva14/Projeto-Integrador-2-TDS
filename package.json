@@ -1,0 +1,28 @@
+{
+  "name": "sistema-eventos-escolares",
+  "version": "1.0.0",
+  "description": "Sistema de Eventos Escolares — Projeto Integrador 2º TDS",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/seed.js"
+  },
+  "author": "Grupo 7 — 2º TDS",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "dotenv": "^18.0.3",
+    "ejs": "^6.0.1",
+    "express": "^4.22.3",
+    "express-session": "^1.19.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true
+  },
+  "private": true
+}
