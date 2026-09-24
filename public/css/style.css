@@ -1,10 +1,17 @@
-/* Identidade visual — CLAUDE.md, seção 9. Um único arquivo, sem framework. */
+/* Identidade visual — CLAUDE.md, seção 9, e docs/DESIGN.md (tokens). Um único arquivo, sem framework. */
 
 :root {
   --cor-primaria: #2563EB;
   --cor-primaria-escura: #1D4ED8;
-  --cor-sucesso: #10B981;
-  --cor-alerta: #EF4444;
+  --cor-sucesso: #10B981;        /* só borda/ícone: 2.5:1 no branco, não serve para texto */
+  --cor-sucesso-texto: #047857;
+  --cor-sucesso-fundo: #D1FAE5;
+  --cor-alerta: #EF4444;         /* só borda/ícone: 3.8:1 no branco, não serve para texto */
+  --cor-alerta-texto: #B91C1C;
+  --cor-alerta-forte: #DC2626;   /* fundo do botão de excluir (branco em cima: 4.8:1) */
+  --cor-alerta-fundo: #FEE2E2;
+  --cor-neutro-texto: #475569;
+  --cor-neutro-fundo: #F1F5F9;
   --cor-fundo: #F8FAFC;
   --cor-superficie: #FFFFFF;
   --cor-texto: #1E293B;
@@ -12,11 +19,14 @@
   --cor-borda: #E2E8F0;
 
   --raio: 12px;
+  --raio-campo: 8px;
   --sombra: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
   --sombra-hover: 0 4px 12px rgba(15, 23, 42, 0.10);
 
   --fonte-titulo: 'Poppins', system-ui, sans-serif;
   --fonte-texto: 'Inter', system-ui, sans-serif;
+
+  --curva-saida: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 *,
@@ -138,7 +148,7 @@ textarea {
   color: inherit;
   padding: 8px 12px;
   border: 1px solid var(--cor-borda);
-  border-radius: 8px;
+  border-radius: var(--raio-campo);
   background: var(--cor-superficie);
 }
 
@@ -156,12 +166,17 @@ textarea:focus {
   font: inherit;
   font-weight: 600;
   padding: 10px 18px;
-  border-radius: 8px;
+  border-radius: var(--raio-campo);
   border: 1px solid transparent;
   background: var(--cor-primaria);
-  color: #FFFFFF;
+  color: var(--cor-superficie);
   text-decoration: none;
   cursor: pointer;
+  transition: transform 150ms var(--curva-saida);
+}
+
+.botao:active {
+  transform: scale(0.97);
 }
 
 .botao:hover {
@@ -194,7 +209,7 @@ textarea:focus {
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
   box-shadow: var(--sombra);
-  transition: box-shadow 150ms ease, transform 150ms ease;
+  transition: box-shadow 200ms var(--curva-saida), transform 200ms var(--curva-saida);
 }
 
 .card:hover {
@@ -240,21 +255,22 @@ textarea:focus {
   border-radius: 999px;
   font-size: 0.8125rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .badge-disponivel {
-  background: #D1FAE5;
-  color: #047857;
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso-texto);
 }
 
 .badge-esgotado {
-  background: #FEE2E2;
-  color: #B91C1C;
+  background: var(--cor-alerta-fundo);
+  color: var(--cor-alerta-texto);
 }
 
 .badge-encerrado {
-  background: #F1F5F9;
-  color: #475569;
+  background: var(--cor-neutro-fundo);
+  color: var(--cor-neutro-texto);
 }
 
 /* ---------- Estado vazio ---------- */
@@ -277,11 +293,13 @@ textarea:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card {
+  .card,
+  .botao {
     transition: none;
   }
 
-  .card:hover {
+  .card:hover,
+  .botao:active {
     transform: none;
   }
 }

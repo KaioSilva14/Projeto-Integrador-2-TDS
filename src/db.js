@@ -3,7 +3,10 @@ const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
 
-const caminhoBanco = path.join(__dirname, '..', 'data', 'eventos.db');
+// DB_PATH vem do .env; caminho relativo é resolvido a partir da raiz do projeto.
+const raizProjeto = path.join(__dirname, '..');
+const caminhoBanco = path.resolve(raizProjeto, process.env.DB_PATH || 'data/eventos.db');
+fs.mkdirSync(path.dirname(caminhoBanco), { recursive: true });
 const db = new Database(caminhoBanco);
 
 // O SQLite vem com chaves estrangeiras desligadas; sem isto o ON DELETE CASCADE não funciona.
